@@ -2,10 +2,10 @@ use anyhow::{Context, Result};
 use clap::{Parser, ValueEnum};
 use css_color_parser::Color as CssColor;
 
-#[cfg(feature = "i3")]
+#[cfg(not(feature = "hyprland"))]
 use font_loader::system_fonts;
 
-#[cfg(feature = "i3")]
+#[cfg(not(feature = "hyprland"))]
 use log::{info, warn};
 
 use crate::utils;
@@ -25,7 +25,7 @@ pub enum VerticalAlign {
 }
 
 /// Load a system font.
-#[cfg(feature = "i3")]
+#[cfg(not(feature = "hyprland"))]
 fn load_font(font_family: &str) -> Result<Vec<u8>> {
     let mut font_family_property = system_fonts::FontPropertyBuilder::new()
         .family(font_family)

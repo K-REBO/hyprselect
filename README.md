@@ -23,6 +23,30 @@ Thanks to cairo, it should work on all kinds of screens and automatically displa
 - For i3: `cargo install --features i3 wmfocus`
 - For Hyprland: `cargo install --features hyprland wmfocus`
 
+**With Nix** (flakes):
+```bash
+# Run directly (Hyprland version, default)
+nix run github:K-REBO/wmfocus
+
+# Run i3 version
+nix run github:K-REBO/wmfocus#wmfocus-i3
+
+# Install to profile
+nix profile install github:K-REBO/wmfocus        # Hyprland
+nix profile install github:K-REBO/wmfocus#wmfocus-i3  # i3
+```
+
+For NixOS/home-manager, add the overlay:
+```nix
+{
+  inputs.wmfocus.url = "github:K-REBO/wmfocus";
+
+  # In your configuration:
+  nixpkgs.overlays = [ inputs.wmfocus.overlays.default ];
+  environment.systemPackages = [ pkgs.wmfocus ];  # or pkgs.wmfocus-i3
+}
+```
+
 ## Usage
 
 Draw labels on the upper-left corner of all windows:
