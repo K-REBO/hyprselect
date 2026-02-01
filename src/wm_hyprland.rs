@@ -69,8 +69,17 @@ fn compute_client_id(address: &hyprland::shared::Address) -> i64 {
 
 /// Focus a specific window by its ID.
 pub fn focus_window(window: &DesktopWindow) -> Result<()> {
+    debug!("focus_window called with ID: {}, pos: {:?}", window.id, window.pos);
+
     let clients = Clients::get().context("Failed to get clients")?;
     let client_vec = clients.to_vec();
+
+    // Debug: print all client IDs
+    for c in &client_vec {
+        let cid = compute_client_id(&c.address);
+        debug!("Client: {} (ws {}), ID: {}, match: {}",
+               c.title, c.workspace.id, cid, cid == window.id);
+    }
 
     // Find the client that matches this window's ID (hash of address)
     let target_client = client_vec
