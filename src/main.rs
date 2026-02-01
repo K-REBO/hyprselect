@@ -94,7 +94,7 @@ fn main() -> Result<()> {
             app_config.font.font_size,
         )
         .context("Couldn't create extents for text")?;
-        let (width, height, margin_width, margin_height) = if app_config.fill {
+        let (width, height, margin_left, margin_top) = if app_config.fill {
             (
                 desktop_window.size.0 as u16,
                 desktop_window.size.1 as u16,
@@ -102,12 +102,15 @@ fn main() -> Result<()> {
                 (f64::from(desktop_window.size.1) - text_extents.height()) / 2.0,
             )
         } else {
-            let margin_factor = 1.0 + 0.2;
+            let margin_l = text_extents.width() * f64::from(app_config.margin.left);
+            let margin_r = text_extents.width() * f64::from(app_config.margin.right);
+            let margin_t = text_extents.height() * f64::from(app_config.margin.top);
+            let margin_b = text_extents.height() * f64::from(app_config.margin.bottom);
             (
-                (text_extents.width() * margin_factor).round() as u16,
-                (text_extents.height() * margin_factor).round() as u16,
-                ((text_extents.width() * margin_factor) - text_extents.width()) / 2.0,
-                ((text_extents.height() * margin_factor) - text_extents.height()) / 2.0,
+                (text_extents.width() + margin_l + margin_r).round() as u16,
+                (text_extents.height() + margin_t + margin_b).round() as u16,
+                margin_l,
+                margin_t,
             )
         };
 
@@ -117,8 +120,8 @@ fn main() -> Result<()> {
         // https://www.cairographics.org/samples/text_extents/
         // https://www.cairographics.org/tutorial/#L1understandingtext
         let draw_pos = (
-            margin_width - text_extents.x_bearing(),
-            text_extents.height() + margin_height
+            margin_left - text_extents.x_bearing(),
+            text_extents.height() + margin_top
                 - (text_extents.height() + text_extents.y_bearing()),
         );
 

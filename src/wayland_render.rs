@@ -429,12 +429,15 @@ impl WaylandRenderer {
 
         let text_extents = ctx.text_extents(hint)?;
 
-        // Use margin from config
+        // Use margin from config (left, right, top, bottom)
         let base_size = self.app_config.font.font_size;
-        let margin = base_size * self.app_config.margin as f64;
+        let margin_left = base_size * self.app_config.margin.left as f64;
+        let margin_right = base_size * self.app_config.margin.right as f64;
+        let margin_top = base_size * self.app_config.margin.top as f64;
+        let margin_bottom = base_size * self.app_config.margin.bottom as f64;
 
-        let rect_width = text_extents.width() + margin * 2.0;
-        let rect_height = base_size + margin * 2.0;
+        let rect_width = text_extents.width() + margin_left + margin_right;
+        let rect_height = base_size + margin_top + margin_bottom;
 
         // Calculate x position based on horizontal alignment
         let x_offset = self.app_config.offset.x as f64;
@@ -487,8 +490,8 @@ impl WaylandRenderer {
         };
         ctx.set_source_rgba(text.0, text.1, text.2, text.3);
 
-        let text_x = x + margin;
-        let text_y = y + margin + text_extents.height();
+        let text_x = x + margin_left;
+        let text_y = y + margin_top + text_extents.height();
         ctx.move_to(text_x, text_y);
         ctx.show_text(hint)?;
 

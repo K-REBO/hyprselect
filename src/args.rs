@@ -120,6 +120,53 @@ pub struct Offset {
 }
 
 #[derive(Debug, Clone)]
+pub struct Margin {
+    pub left: f32,
+    pub right: f32,
+    pub top: f32,
+    pub bottom: f32,
+}
+
+/// Parse margin in format "left,right,top,bottom" or single value for all sides.
+fn parse_margin(s: &str) -> Result<Margin, String> {
+    let parts: Vec<&str> = s.split(',').collect();
+    match parts.len() {
+        1 => {
+            let val = parts[0]
+                .parse::<f32>()
+                .map_err(|_| "Couldn't parse margin value")?;
+            Ok(Margin {
+                left: val,
+                right: val,
+                top: val,
+                bottom: val,
+            })
+        }
+        4 => {
+            let left = parts[0]
+                .parse::<f32>()
+                .map_err(|_| "Couldn't parse left margin")?;
+            let right = parts[1]
+                .parse::<f32>()
+                .map_err(|_| "Couldn't parse right margin")?;
+            let top = parts[2]
+                .parse::<f32>()
+                .map_err(|_| "Couldn't parse top margin")?;
+            let bottom = parts[3]
+                .parse::<f32>()
+                .map_err(|_| "Couldn't parse bottom margin")?;
+            Ok(Margin {
+                left,
+                right,
+                top,
+                bottom,
+            })
+        }
+        _ => Err("Wrong margin format, expected single value or left,right,top,bottom".to_string()),
+    }
+}
+
+#[derive(Debug, Clone)]
 pub struct FontConfig {
     pub font_family: String,
     pub font_size: f64,
@@ -148,8 +195,9 @@ pub struct AppConfig {
     pub hint_chars: String,
 
     /// Add an additional margin around the text box (value is a factor of the box size)
-    #[arg(short, long, default_value = "0.2")]
-    pub margin: f32,
+    /// Format: single value or left,right,top,bottom
+    #[arg(short, long, default_value = "0.2", value_parser(parse_margin))]
+    pub margin: Margin,
 
     /// Text color (CSS notation)
     #[arg(
