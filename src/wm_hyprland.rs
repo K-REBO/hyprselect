@@ -42,13 +42,7 @@ pub fn get_windows() -> Result<Vec<DesktopWindow>> {
     let mut windows = Vec::new();
     for client in visible_clients {
         // Use the address as a unique ID (convert the string representation to a hash)
-        let id = {
-            use std::collections::hash_map::DefaultHasher;
-            use std::hash::{Hash, Hasher};
-            let mut hasher = DefaultHasher::new();
-            client.address.to_string().hash(&mut hasher);
-            hasher.finish() as i64
-        };
+        let id = compute_client_id(&client.address);
 
         let window = DesktopWindow {
             id,
@@ -64,24 +58,30 @@ pub fn get_windows() -> Result<Vec<DesktopWindow>> {
     Ok(windows)
 }
 
+/// Compute the ID hash for a client address (must match get_windows logic).
+fn compute_client_id(address: &hyprland::shared::Address) -> i64 {
+    use std::collections::hash_map::DefaultHasher;
+    use std::hash::{Hash, Hasher};
+    let mut hasher = DefaultHasher::new();
+    address.to_string().hash(&mut hasher);
+    hasher.finish() as i64
+}
+
 /// Focus a specific window by its ID.
 pub fn focus_window(window: &DesktopWindow) -> Result<()> {
-    // We need to find the client by position since we can't reconstruct the address from ID
     let clients = Clients::get().context("Failed to get clients")?;
     let client_vec = clients.to_vec();
 
-    // Find the client that matches this window's position and size
+    // Find the client that matches this window's ID (hash of address)
     let target_client = client_vec
         .iter()
-        .find(|c| {
-            c.at.0 as i32 == window.pos.0
-                && c.at.1 as i32 == window.pos.1
-                && c.size.0 as i32 == window.size.0
-                && c.size.1 as i32 == window.size.1
-        })
-        .context("Could not find matching client")?;
+        .find(|c| compute_client_id(&c.address) == window.id)
+        .context("Could not find matching client by ID")?;
 
-    info!("Focusing window at ({}, {})", window.pos.0, window.pos.1);
+    info!(
+        "Focusing window: {} at ({}, {})",
+        target_client.title, window.pos.0, window.pos.1
+    );
 
     HyprDispatch::call(DispatchType::FocusWindow(WindowIdentifier::Address(
         target_client.address.clone(),
@@ -94,29 +94,18 @@ pub fn focus_window(window: &DesktopWindow) -> Result<()> {
 /// Swap two windows.
 #[allow(dead_code)]
 pub fn swap_windows(active_window: &DesktopWindow, window: &DesktopWindow) -> Result<()> {
-    // We need to find the clients by position
     let clients = Clients::get().context("Failed to get clients")?;
     let client_vec = clients.to_vec();
 
     let _active_client = client_vec
         .iter()
-        .find(|c| {
-            c.at.0 as i32 == active_window.pos.0
-                && c.at.1 as i32 == active_window.pos.1
-                && c.size.0 as i32 == active_window.size.0
-                && c.size.1 as i32 == active_window.size.1
-        })
-        .context("Could not find active client")?;
+        .find(|c| compute_client_id(&c.address) == active_window.id)
+        .context("Could not find active client by ID")?;
 
     let target_client = client_vec
         .iter()
-        .find(|c| {
-            c.at.0 as i32 == window.pos.0
-                && c.at.1 as i32 == window.pos.1
-                && c.size.0 as i32 == window.size.0
-                && c.size.1 as i32 == window.size.1
-        })
-        .context("Could not find target client")?;
+        .find(|c| compute_client_id(&c.address) == window.id)
+        .context("Could not find target client by ID")?;
 
     info!(
         "Swapping windows at ({}, {}) <-> ({}, {})",

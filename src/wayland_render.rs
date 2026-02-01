@@ -417,8 +417,7 @@ impl WaylandRenderer {
     }
 
     fn draw_hint(&self, ctx: &cairo::Context, hint: &str, window: &DesktopWindow) -> Result<()> {
-        let x = window.pos.0 as f64;
-        let y = window.pos.1 as f64;
+        use crate::args::{HorizontalAlign, VerticalAlign};
 
         // Set font first to get accurate text extents
         ctx.select_font_face(
@@ -436,6 +435,30 @@ impl WaylandRenderer {
 
         let rect_width = text_extents.width() + margin * 2.0;
         let rect_height = base_size + margin * 2.0;
+
+        // Calculate x position based on horizontal alignment
+        let x_offset = self.app_config.offset.x as f64;
+        let x = match self.app_config.horizontal_align {
+            HorizontalAlign::Left => window.pos.0 as f64 + x_offset,
+            HorizontalAlign::Center => {
+                window.pos.0 as f64 + (window.size.0 as f64 - rect_width) / 2.0
+            }
+            HorizontalAlign::Right => {
+                window.pos.0 as f64 + window.size.0 as f64 - rect_width - x_offset
+            }
+        };
+
+        // Calculate y position based on vertical alignment
+        let y_offset = self.app_config.offset.y as f64;
+        let y = match self.app_config.vertical_align {
+            VerticalAlign::Top => window.pos.1 as f64 + y_offset,
+            VerticalAlign::Center => {
+                window.pos.1 as f64 + (window.size.1 as f64 - rect_height) / 2.0
+            }
+            VerticalAlign::Bottom => {
+                window.pos.1 as f64 + window.size.1 as f64 - rect_height - y_offset
+            }
+        };
 
         // Draw rounded rectangle background
         let bg = if window.is_focused {
