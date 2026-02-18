@@ -428,6 +428,7 @@ impl WaylandRenderer {
         ctx.set_font_size(self.app_config.font.font_size);
 
         let text_extents = ctx.text_extents(hint)?;
+        let font_extents = ctx.font_extents()?;
 
         // Use margin from config (left, right, top, bottom)
         let base_size = self.app_config.font.font_size;
@@ -490,8 +491,10 @@ impl WaylandRenderer {
         };
         ctx.set_source_rgba(text.0, text.1, text.2, text.3);
 
+        // Use font_extents for consistent vertical centering regardless of character
+        // Visual center: place midpoint of ascent at box center
         let text_x = x + margin_left;
-        let text_y = y + margin_top + text_extents.height();
+        let text_y = y + rect_height / 2.0 + font_extents.ascent() / 2.0;
         ctx.move_to(text_x, text_y);
         ctx.show_text(hint)?;
 

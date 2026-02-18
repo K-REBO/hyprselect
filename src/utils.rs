@@ -116,7 +116,7 @@ pub fn find_xcb_visualtype(conn: &impl Connection, visual_id: u32) -> Option<xcb
 }
 
 #[cfg(feature = "i3")]
-pub fn extents_for_text(text: &str, family: &str, size: f64) -> Result<cairo::TextExtents> {
+pub fn extents_for_text(text: &str, family: &str, size: f64) -> Result<(cairo::TextExtents, cairo::FontExtents)> {
     // Create a buffer image that should be large enough.
     // TODO: Figure out the maximum size from the largest window on the desktop.
     // For now we'll use made-up maximum values.
@@ -125,7 +125,9 @@ pub fn extents_for_text(text: &str, family: &str, size: f64) -> Result<cairo::Te
     let cr = cairo::Context::new(&surface).context("Couldn't create Cairo Surface")?;
     cr.select_font_face(family, cairo::FontSlant::Normal, cairo::FontWeight::Normal);
     cr.set_font_size(size);
-    cr.text_extents(text).context("Couldn't create TextExtents")
+    let text_extents = cr.text_extents(text).context("Couldn't create TextExtents")?;
+    let font_extents = cr.font_extents().context("Couldn't create FontExtents")?;
+    Ok((text_extents, font_extents))
 }
 
 /// Draw a `text` onto `rw`. In case any `current_hints` are already typed, it will draw those in a

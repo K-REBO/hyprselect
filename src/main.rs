@@ -88,7 +88,7 @@ fn main() -> Result<()> {
         .context("Couldn't get next hint")?;
 
         // Figure out how large the window actually needs to be.
-        let text_extents = utils::extents_for_text(
+        let (text_extents, font_extents) = utils::extents_for_text(
             &hint,
             &app_config.font.font_family,
             app_config.font.font_size,
@@ -119,10 +119,11 @@ fn main() -> Result<()> {
         // https://www.cairographics.org/samples/text_align_center/
         // https://www.cairographics.org/samples/text_extents/
         // https://www.cairographics.org/tutorial/#L1understandingtext
+        // Use font_extents for consistent vertical centering regardless of character
+        // Visual center: place midpoint of ascent at box center
         let draw_pos = (
             margin_left - text_extents.x_bearing(),
-            text_extents.height() + margin_top
-                - (text_extents.height() + text_extents.y_bearing()),
+            f64::from(height) / 2.0 + font_extents.ascent() / 2.0,
         );
 
         debug!(
