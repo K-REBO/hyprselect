@@ -428,7 +428,6 @@ impl WaylandRenderer {
         ctx.set_font_size(self.app_config.font.font_size);
 
         let text_extents = ctx.text_extents(hint)?;
-        let font_extents = ctx.font_extents()?;
 
         // Use margin from config (left, right, top, bottom)
         let base_size = self.app_config.font.font_size;
@@ -437,31 +436,32 @@ impl WaylandRenderer {
         let margin_top = base_size * self.app_config.margin.top as f64;
         let margin_bottom = base_size * self.app_config.margin.bottom as f64;
 
-        let rect_width = text_extents.width() + margin_left + margin_right;
-        let rect_height = base_size + margin_top + margin_bottom;
+        let (rect_width, rect_height, x, y) = if self.app_config.fill {
+            (
+                window.size.0 as f64,
+                window.size.1 as f64,
+                window.pos.0 as f64,
+                window.pos.1 as f64,
+            )
+        } else {
+            let rw = text_extents.width() + margin_left + margin_right;
+            let rh = base_size + margin_top + margin_bottom;
 
-        // Calculate x position based on horizontal alignment
-        let x_offset = self.app_config.offset.x as f64;
-        let x = match self.app_config.horizontal_align {
-            HorizontalAlign::Left => window.pos.0 as f64 + x_offset,
-            HorizontalAlign::Center => {
-                window.pos.0 as f64 + (window.size.0 as f64 - rect_width) / 2.0
-            }
-            HorizontalAlign::Right => {
-                window.pos.0 as f64 + window.size.0 as f64 - rect_width - x_offset
-            }
-        };
+            let x_offset = self.app_config.offset.x as f64;
+            let rx = match self.app_config.horizontal_align {
+                HorizontalAlign::Left => window.pos.0 as f64 + x_offset,
+                HorizontalAlign::Center => window.pos.0 as f64 + (window.size.0 as f64 - rw) / 2.0,
+                HorizontalAlign::Right => window.pos.0 as f64 + window.size.0 as f64 - rw - x_offset,
+            };
 
-        // Calculate y position based on vertical alignment
-        let y_offset = self.app_config.offset.y as f64;
-        let y = match self.app_config.vertical_align {
-            VerticalAlign::Top => window.pos.1 as f64 + y_offset,
-            VerticalAlign::Center => {
-                window.pos.1 as f64 + (window.size.1 as f64 - rect_height) / 2.0
-            }
-            VerticalAlign::Bottom => {
-                window.pos.1 as f64 + window.size.1 as f64 - rect_height - y_offset
-            }
+            let y_offset = self.app_config.offset.y as f64;
+            let ry = match self.app_config.vertical_align {
+                VerticalAlign::Top => window.pos.1 as f64 + y_offset,
+                VerticalAlign::Center => window.pos.1 as f64 + (window.size.1 as f64 - rh) / 2.0,
+                VerticalAlign::Bottom => window.pos.1 as f64 + window.size.1 as f64 - rh - y_offset,
+            };
+
+            (rw, rh, rx, ry)
         };
 
         // Draw rounded rectangle background
@@ -472,7 +472,7 @@ impl WaylandRenderer {
         };
         ctx.set_source_rgba(bg.0, bg.1, bg.2, bg.3);
 
-        let radius = 5.0;
+        let radius = if self.app_config.fill { 0.0 } else { 5.0 };
         let degrees = std::f64::consts::PI / 180.0;
 
         ctx.new_sub_path();
@@ -491,8 +491,8 @@ impl WaylandRenderer {
         };
         ctx.set_source_rgba(text.0, text.1, text.2, text.3);
 
-        let text_x = x + margin_left - text_extents.x_bearing();
-        let text_y = y + rect_height / 2.0 + (font_extents.ascent() - font_extents.descent()) / 2.0;
+        let text_x = x + (rect_width - text_extents.width()) / 2.0 - text_extents.x_bearing();
+        let text_y = y + (rect_height - text_extents.height()) / 2.0 - text_extents.y_bearing();
         ctx.move_to(text_x, text_y);
         ctx.show_text(hint)?;
 
