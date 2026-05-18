@@ -491,10 +491,8 @@ impl WaylandRenderer {
         };
         ctx.set_source_rgba(text.0, text.1, text.2, text.3);
 
-        // Use font_extents for consistent vertical centering regardless of character
-        // Visual center: place midpoint of ascent at box center
-        let text_x = x + margin_left;
-        let text_y = y + rect_height / 2.0 + font_extents.ascent() / 2.0;
+        let text_x = x + margin_left - text_extents.x_bearing();
+        let text_y = y + rect_height / 2.0 + (font_extents.ascent() - font_extents.descent()) / 2.0;
         ctx.move_to(text_x, text_y);
         ctx.show_text(hint)?;
 
