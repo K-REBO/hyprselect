@@ -1,12 +1,17 @@
 # wmfocus - Visually focus windows by label
 
-[![CI](https://github.com/svenstaro/wmfocus/workflows/CI/badge.svg)](https://github.com/svenstaro/wmfocus/actions)
-[![Crates.io](https://img.shields.io/crates/v/wmfocus.svg)](https://crates.io/crates/wmfocus)
-[![license](http://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/svenstaro/wmfocus/blob/master/LICENSE)
-[![Stars](https://img.shields.io/github/stars/svenstaro/wmfocus.svg)](https://github.com/svenstaro/wmfocus/stargazers)
-[![Lines of Code](https://tokei.rs/b1/github/svenstaro/wmfocus)](https://github.com/svenstaro/wmfocus)
+[![CI](https://github.com/K-REBO/wmfocus/workflows/CI/badge.svg)](https://github.com/K-REBO/wmfocus/actions)
+[![license](http://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/K-REBO/wmfocus/blob/master/LICENSE)
+[![Stars](https://img.shields.io/github/stars/K-REBO/wmfocus.svg)](https://github.com/K-REBO/wmfocus/stargazers)
 
-This tool that allows you to rapidly choose a specific window directly without having to use the mouse or directional keyboard navigation.
+> **Fork of [svenstaro/wmfocus](https://github.com/svenstaro/wmfocus)** with active Wayland (Hyprland) support.
+
+This tool allows you to rapidly choose a specific window directly without having to use the mouse or directional keyboard navigation.
+
+**Supported window managers:**
+- **Hyprland** (Wayland) — actively maintained in this fork
+- i3
+- sway (partial, accepting PRs)
 
 ![Screen cast](cast.apng)
 
@@ -15,13 +20,13 @@ Thanks to cairo, it should work on all kinds of screens and automatically displa
 
 ## Installation
 
-<a href="https://repology.org/project/wmfocus/versions"><img align="right" src="https://repology.org/badge/vertical-allrepos/wmfocus.svg" alt="Packaging status"></a>
-
-**On Arch Linux**: `pacman -S wmfocus`
-
-**With Cargo**:
-- For i3: `cargo install --features i3 wmfocus`
-- For Hyprland: `cargo install --features hyprland wmfocus`
+**With Cargo** (clone first):
+```bash
+git clone https://github.com/K-REBO/wmfocus.git
+cd wmfocus
+cargo install --features hyprland --path .  # Hyprland
+cargo install --features i3 --path .        # i3
+```
 
 **With Nix** (flakes):
 ```bash
@@ -71,7 +76,8 @@ wmfocus will make use of a compositor to get real transparency.
 ```
 wmfocus 1.5.0
 
-Sven-Hendrik Haase <svenstaro@gmail.com>
+Bido Nakamura <bido@bido.dev>
+Forked from svenstaro/wmfocus by Sven-Hendrik Haase <svenstaro@gmail.com>
 
 Visually focus windows by label
 
@@ -110,37 +116,21 @@ This will print quite some useful debugging info.
 
 ## Compiling
 
-**For i3**: You need to have recent versions of `rust`, `cargo`, `xcb-util-keysyms`, `libxkbcommon-x11` and `cairo` installed.
-
-    git clone https://github.com/svenstaro/wmfocus.git
-    cd wmfocus
-    cargo run --features i3
-
 **For Hyprland**: You need to have recent versions of `rust`, `cargo`, `wayland-client`, `libxkbcommon` and `cairo` installed.
 
-    git clone https://github.com/svenstaro/wmfocus.git
+    git clone https://github.com/K-REBO/wmfocus.git
     cd wmfocus
     cargo run --features hyprland
 
+**For i3**: You need to have recent versions of `rust`, `cargo`, `xcb-util-keysyms`, `libxkbcommon-x11` and `cairo` installed.
 
-## Window manager support
+    git clone https://github.com/K-REBO/wmfocus.git
+    cd wmfocus
+    cargo run --features i3
 
-While this tool is window manager-independent, an implementation for your favorite window manager might not yet be available. Current support:
 
-- i3
-- Hyprland (Wayland)
-- sway (partial, accepting PRs)
+## Contributing
 
-If you want to implement support for more window managers, have a look at the [i3 implementation](https://github.com/svenstaro/wmfocus/blob/master/src/wm_i3.rs) or the [Hyprland implementation](https://github.com/svenstaro/wmfocus/blob/master/src/wm_hyprland.rs).
+If you want to implement support for more window managers, have a look at the [i3 implementation](https://github.com/K-REBO/wmfocus/blob/master/src/wm_i3.rs) or the [Hyprland implementation](https://github.com/K-REBO/wmfocus/blob/master/src/wm_hyprland.rs).
 
 This tool is heavily inspired by [i3-easyfocus](https://github.com/cornerman/i3-easyfocus).
-
-
-## Releasing
-
-This is mostly a note for me on how to release this thing:
-
-- `cargo release`
-- `cargo release --execute`
-- Release will automatically be deployed by GitHub Actions.
-- Update Arch package.

@@ -2,8 +2,8 @@
 name = "wmfocus"
 description = "Visually focus windows by label"
 version = "1.5.0"
-repository = "https://github.com/svenstaro/wmfocus"
-authors = ["Sven-Hendrik Haase <svenstaro@gmail.com>"]
+repository = "https://github.com/K-REBO/wmfocus"
+authors = ["Bido Nakamura <bido@bido.dev>", "Forked from svenstaro/wmfocus by Sven-Hendrik Haase <svenstaro@gmail.com>"]
 license = "MIT"
 readme = "README.md"
 keywords = ["wm", "window", "manager", "i3"]
