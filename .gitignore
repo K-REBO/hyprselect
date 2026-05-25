@@ -7,3 +7,7 @@
 
 /target
 **/*.rs.bk
+
+# Nix build output
+/result
+/result-*

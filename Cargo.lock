@@ -670,6 +670,32 @@ dependencies = [
 ]
 
 [[package]]
+name = "hyprselect"
+version = "1.5.0"
+dependencies = [
+ "anyhow",
+ "cairo-rs",
+ "clap",
+ "css-color-parser",
+ "font-loader",
+ "hyprland",
+ "i3ipc",
+ "itertools",
+ "log",
+ "memmap2 0.9.9",
+ "nix",
+ "pretty_env_logger",
+ "regex",
+ "tempfile",
+ "wayland-client",
+ "wayland-protocols",
+ "wayland-protocols-wlr",
+ "x11rb",
+ "xkbcommon",
+ "xkeysym",
+]
+
+[[package]]
 name = "i3ipc"
 version = "0.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1529,32 +1555,6 @@ name = "wit-bindgen"
 version = "0.46.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f17a85883d4e6d00e8a97c586de764dabcc06133f7f1d55dce5cdc070ad7fe59"
-
-[[package]]
-name = "wmfocus"
-version = "1.5.0"
-dependencies = [
- "anyhow",
- "cairo-rs",
- "clap",
- "css-color-parser",
- "font-loader",
- "hyprland",
- "i3ipc",
- "itertools",
- "log",
- "memmap2 0.9.9",
- "nix",
- "pretty_env_logger",
- "regex",
- "tempfile",
- "wayland-client",
- "wayland-protocols",
- "wayland-protocols-wlr",
- "x11rb",
- "xkbcommon",
- "xkeysym",
-]
 
 [[package]]
 name = "x11rb"
