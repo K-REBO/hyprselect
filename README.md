@@ -11,7 +11,6 @@ This tool allows you to rapidly choose a specific window directly without having
 **Supported window managers:**
 - **Hyprland** (Wayland) — actively maintained in this fork
 - i3
-- sway (partial, accepting PRs)
 
 <video src="https://github.com/user-attachments/assets/9c5aeac1-f342-4704-ba78-18c4ed5cc5be" autoplay loop muted playsinline></video>
 
