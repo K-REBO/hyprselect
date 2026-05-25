@@ -179,7 +179,7 @@ fn parse_exit_keys(s: &str) -> Result<utils::Sequence> {
 }
 
 #[derive(Parser, Debug)]
-#[command(name = "wmfocus", author, about, version)]
+#[command(name = "hyprselect", author, about, version)]
 pub struct AppConfig {
     /// Use a specific TrueType font with this format: family:size
     #[arg(

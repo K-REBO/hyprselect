@@ -311,7 +311,7 @@ impl WaylandRenderer {
             &surface,
             None,
             Layer::Overlay,
-            "wmfocus".to_string(),
+            "hyprselect".to_string(),
             &qh,
             (),
         );

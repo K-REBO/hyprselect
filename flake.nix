@@ -12,13 +12,13 @@
 
       pkgsFor = system: nixpkgs.legacyPackages.${system};
 
-      mkWmfocus = { pkgs, features ? [ "hyprland" ] }:
+      mkHyprselect = { pkgs, features ? [ "hyprland" ] }:
         let
           hasI3 = builtins.elem "i3" features;
           hasWayland = builtins.elem "wayland" features || builtins.elem "hyprland" features;
         in
         pkgs.rustPlatform.buildRustPackage {
-          pname = "wmfocus";
+          pname = "hyprselect";
           version = "1.5.0";
 
           src = ./.;
@@ -54,10 +54,10 @@
 
           meta = with pkgs.lib; {
             description = "Visually focus windows by label";
-            homepage = "https://github.com/svenstaro/wmfocus";
+            homepage = "https://github.com/K-REBO/hyprselect";
             license = licenses.mit;
             platforms = platforms.linux;
-            mainProgram = "wmfocus";
+            mainProgram = "hyprselect";
           };
         };
     in
@@ -67,14 +67,14 @@
           pkgs = pkgsFor system;
         in
         {
-          default = self.packages.${system}.wmfocus-hyprland;
+          default = self.packages.${system}.hyprselect-hyprland;
 
-          wmfocus-hyprland = mkWmfocus {
+          hyprselect-hyprland = mkHyprselect {
             inherit pkgs;
             features = [ "hyprland" ];
           };
 
-          wmfocus-i3 = mkWmfocus {
+          hyprselect-i3 = mkHyprselect {
             inherit pkgs;
             features = [ "i3" ];
           };
@@ -87,7 +87,7 @@
         in
         {
           default = pkgs.mkShell {
-            inputsFrom = [ self.packages.${system}.wmfocus-hyprland ];
+            inputsFrom = [ self.packages.${system}.hyprselect-hyprland ];
 
             packages = with pkgs; [
               cargo
@@ -103,9 +103,9 @@
       );
 
       overlays.default = final: prev: {
-        wmfocus = self.packages.${prev.system}.default;
-        wmfocus-i3 = self.packages.${prev.system}.wmfocus-i3;
-        wmfocus-hyprland = self.packages.${prev.system}.wmfocus-hyprland;
+        hyprselect = self.packages.${prev.system}.default;
+        hyprselect-i3 = self.packages.${prev.system}.hyprselect-i3;
+        hyprselect-hyprland = self.packages.${prev.system}.hyprselect-hyprland;
       };
     };
 }

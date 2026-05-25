@@ -1,8 +1,8 @@
-# wmfocus - Visually focus windows by label
+# hyprselect - Visually focus windows by label
 
-[![CI](https://github.com/K-REBO/wmfocus/workflows/CI/badge.svg)](https://github.com/K-REBO/wmfocus/actions)
-[![license](http://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/K-REBO/wmfocus/blob/master/LICENSE)
-[![Stars](https://img.shields.io/github/stars/K-REBO/wmfocus.svg)](https://github.com/K-REBO/wmfocus/stargazers)
+[![CI](https://github.com/K-REBO/hyprselect/workflows/CI/badge.svg)](https://github.com/K-REBO/hyprselect/actions)
+[![license](http://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/K-REBO/hyprselect/blob/master/LICENSE)
+[![Stars](https://img.shields.io/github/stars/K-REBO/hyprselect.svg)](https://github.com/K-REBO/hyprselect/stargazers)
 
 > **Fork of [svenstaro/wmfocus](https://github.com/svenstaro/wmfocus)** with active Wayland (Hyprland) support.
 
@@ -22,8 +22,8 @@ Thanks to cairo, it should work on all kinds of screens and automatically displa
 
 **With Cargo** (clone first):
 ```bash
-git clone https://github.com/K-REBO/wmfocus.git
-cd wmfocus
+git clone https://github.com/K-REBO/hyprselect.git
+cd hyprselect
 cargo install --features hyprland --path .  # Hyprland
 cargo install --features i3 --path .        # i3
 ```
@@ -31,24 +31,24 @@ cargo install --features i3 --path .        # i3
 **With Nix** (flakes):
 ```bash
 # Run directly (Hyprland version, default)
-nix run github:K-REBO/wmfocus
+nix run github:K-REBO/hyprselect
 
 # Run i3 version
-nix run github:K-REBO/wmfocus#wmfocus-i3
+nix run github:K-REBO/hyprselect#hyprselect-i3
 
 # Install to profile
-nix profile install github:K-REBO/wmfocus        # Hyprland
-nix profile install github:K-REBO/wmfocus#wmfocus-i3  # i3
+nix profile install github:K-REBO/hyprselect        # Hyprland
+nix profile install github:K-REBO/hyprselect#hyprselect-i3  # i3
 ```
 
 For NixOS/home-manager, add the overlay:
 ```nix
 {
-  inputs.wmfocus.url = "github:K-REBO/wmfocus";
+  inputs.hyprselect.url = "github:K-REBO/hyprselect";
 
   # In your configuration:
-  nixpkgs.overlays = [ inputs.wmfocus.overlays.default ];
-  environment.systemPackages = [ pkgs.wmfocus ];  # or pkgs.wmfocus-i3
+  nixpkgs.overlays = [ inputs.hyprselect.overlays.default ];
+  environment.systemPackages = [ pkgs.hyprselect ];  # or pkgs.hyprselect-i3
 }
 ```
 
@@ -56,25 +56,25 @@ For NixOS/home-manager, add the overlay:
 
 Draw labels on the upper-left corner of all windows:
 
-    wmfocus
+    hyprselect
 
 Completely fill out windows and draw the label in the middle (try it with transparency!):
 
-    wmfocus --fill
+    hyprselect --fill
 
 Use a different font (as provided by fontconfig):
 
-    wmfocus -f "Droid Sans":100
+    hyprselect -f "Droid Sans":100
 
 Change up the default colors:
 
-    wmfocus --textcolor red --textcoloralt "#eeeeee" --bgcolor "rgba(50, 50, 200, 0.5)"
+    hyprselect --textcolor red --textcoloralt "#eeeeee" --bgcolor "rgba(50, 50, 200, 0.5)"
 
-wmfocus will make use of a compositor to get real transparency.
+hyprselect will make use of a compositor to get real transparency.
 
 ## Full help
 ```
-wmfocus 1.5.0
+hyprselect 1.5.0
 
 Bido Nakamura <bido@bido.dev>
 Forked from svenstaro/wmfocus by Sven-Hendrik Haase <svenstaro@gmail.com>
@@ -82,7 +82,7 @@ Forked from svenstaro/wmfocus by Sven-Hendrik Haase <svenstaro@gmail.com>
 Visually focus windows by label
 
 USAGE:
-    wmfocus [OPTIONS]
+    hyprselect [OPTIONS]
 
 OPTIONS:
         --textcolor <TEXT_COLOR>                          Text color (CSS notation) [default: #dddddd]
@@ -107,9 +107,9 @@ OPTIONS:
 
 ## Troubleshooting
 
-If there's some funky stuff, you can try to track it down by running `wmfocus` with `RUST_LOG=trace`:
+If there's some funky stuff, you can try to track it down by running `hyprselect` with `RUST_LOG=trace`:
 
-    RUST_LOG=trace wmfocus
+    RUST_LOG=trace hyprselect
 
 This will print quite some useful debugging info.
 
@@ -118,19 +118,19 @@ This will print quite some useful debugging info.
 
 **For Hyprland**: You need to have recent versions of `rust`, `cargo`, `wayland-client`, `libxkbcommon` and `cairo` installed.
 
-    git clone https://github.com/K-REBO/wmfocus.git
-    cd wmfocus
+    git clone https://github.com/K-REBO/hyprselect.git
+    cd hyprselect
     cargo run --features hyprland
 
 **For i3**: You need to have recent versions of `rust`, `cargo`, `xcb-util-keysyms`, `libxkbcommon-x11` and `cairo` installed.
 
-    git clone https://github.com/K-REBO/wmfocus.git
-    cd wmfocus
+    git clone https://github.com/K-REBO/hyprselect.git
+    cd hyprselect
     cargo run --features i3
 
 
 ## Contributing
 
-If you want to implement support for more window managers, have a look at the [i3 implementation](https://github.com/K-REBO/wmfocus/blob/master/src/wm_i3.rs) or the [Hyprland implementation](https://github.com/K-REBO/wmfocus/blob/master/src/wm_hyprland.rs).
+If you want to implement support for more window managers, have a look at the [i3 implementation](https://github.com/K-REBO/hyprselect/blob/master/src/wm_i3.rs) or the [Hyprland implementation](https://github.com/K-REBO/hyprselect/blob/master/src/wm_hyprland.rs).
 
 This tool is heavily inspired by [i3-easyfocus](https://github.com/cornerman/i3-easyfocus).

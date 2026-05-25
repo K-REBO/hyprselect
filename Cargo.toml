@@ -1,8 +1,8 @@
 [package]
-name = "wmfocus"
+name = "hyprselect"
 description = "Visually focus windows by label"
 version = "1.5.0"
-repository = "https://github.com/K-REBO/wmfocus"
+repository = "https://github.com/K-REBO/hyprselect"
 authors = ["Bido Nakamura <bido@bido.dev>", "Forked from svenstaro/wmfocus by Sven-Hendrik Haase <svenstaro@gmail.com>"]
 license = "MIT"
 readme = "README.md"
