@@ -19,7 +19,38 @@ Thanks to cairo, it should work on all kinds of screens and automatically displa
 
 ## Installation
 
+**Pre-built binaries** (no system dependencies required):
+
+Download from the [latest release](https://github.com/K-REBO/hyprselect/releases/latest):
+
+```bash
+# Hyprland
+curl -L https://github.com/K-REBO/hyprselect/releases/latest/download/hyprselect-hyprland-x86_64-linux -o hyprselect
+chmod +x hyprselect
+sudo mv hyprselect /usr/local/bin/
+
+# i3
+curl -L https://github.com/K-REBO/hyprselect/releases/latest/download/hyprselect-i3-x86_64-linux -o hyprselect
+chmod +x hyprselect
+sudo mv hyprselect /usr/local/bin/
+```
+
 **With Cargo**:
+
+First, install the required system libraries:
+
+```bash
+# Hyprland (Wayland)
+sudo apt install libcairo2-dev libxcb1-dev libglib2.0-dev libwayland-dev  # Debian/Ubuntu
+sudo pacman -S cairo libxcb glib2 wayland                                  # Arch Linux
+
+# i3 (X11)
+sudo apt install libcairo2-dev libxcb1-dev libglib2.0-dev libxkbcommon-dev libxkbcommon-x11-dev  # Debian/Ubuntu
+sudo pacman -S cairo libxcb glib2 libxkbcommon                                                    # Arch Linux
+```
+
+Then install hyprselect:
+
 ```bash
 cargo install hyprselect --features hyprland  # Hyprland
 cargo install hyprselect --features i3        # i3

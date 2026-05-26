@@ -2,10 +2,10 @@ use anyhow::{Context, Result};
 use clap::{Parser, ValueEnum};
 use css_color_parser::Color as CssColor;
 
-#[cfg(not(feature = "hyprland"))]
+#[cfg(feature = "i3")]
 use font_loader::system_fonts;
 
-#[cfg(not(feature = "hyprland"))]
+#[cfg(feature = "i3")]
 use log::{info, warn};
 
 use crate::utils;
@@ -25,7 +25,7 @@ pub enum VerticalAlign {
 }
 
 /// Load a system font.
-#[cfg(not(feature = "hyprland"))]
+#[cfg(feature = "i3")]
 fn load_font(font_family: &str) -> Result<Vec<u8>> {
     let mut font_family_property = system_fonts::FontPropertyBuilder::new()
         .family(font_family)
@@ -68,7 +68,7 @@ fn parse_truetype_font(f: &str) -> Result<FontConfig> {
         return Ok(font_config);
     }
 
-    #[cfg(not(feature = "hyprland"))]
+    #[cfg(feature = "i3")]
     {
         let loaded_font = load_font(family).context("Couldn't load font")?;
         let font_config = FontConfig {
@@ -77,6 +77,13 @@ fn parse_truetype_font(f: &str) -> Result<FontConfig> {
             loaded_font,
         };
         Ok(font_config)
+    }
+
+    #[cfg(not(any(feature = "i3", feature = "hyprland")))]
+    {
+        let _ = family;
+        let _ = size;
+        unreachable!()
     }
 }
 

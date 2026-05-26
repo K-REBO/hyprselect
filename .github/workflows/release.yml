@@ -1,0 +1,48 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    name: Build binaries
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libcairo2-dev libxcb1-dev libglib2.0-dev libwayland-dev \
+            libxkbcommon-dev libxkbcommon-x11-dev libxcb-keysyms1-dev libfontconfig1-dev
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Build (hyprland)
+        run: cargo build --release --features hyprland
+
+      - name: Package hyprland binary
+        run: |
+          cp target/release/hyprselect hyprselect-hyprland-x86_64-linux
+          strip hyprselect-hyprland-x86_64-linux
+
+      - name: Build (i3)
+        run: cargo build --release --features i3
+
+      - name: Package i3 binary
+        run: |
+          cp target/release/hyprselect hyprselect-i3-x86_64-linux
+          strip hyprselect-i3-x86_64-linux
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            hyprselect-hyprland-x86_64-linux
+            hyprselect-i3-x86_64-linux
