@@ -17,15 +17,15 @@ use std::os::fd::AsFd;
 
 // Waylandクライアントライブラリ
 use wayland_client::{
-    Connection, Dispatch, QueueHandle,
-    protocol::{wl_compositor, wl_shm, wl_surface, wl_registry, wl_seat, wl_keyboard},
     globals::{registry_queue_init, GlobalListContents},
+    protocol::{wl_compositor, wl_keyboard, wl_registry, wl_seat, wl_shm, wl_surface},
+    Connection, Dispatch, QueueHandle,
 };
 
 // Layer Shellプロトコル
 use wayland_protocols_wlr::layer_shell::v1::client::{
     zwlr_layer_shell_v1::{self, ZwlrLayerShellV1},
-    zwlr_layer_surface_v1::{self, ZwlrLayerSurfaceV1, Anchor, KeyboardInteractivity},
+    zwlr_layer_surface_v1::{self, Anchor, KeyboardInteractivity, ZwlrLayerSurfaceV1},
 };
 
 // xkbcommon
@@ -50,12 +50,11 @@ fn test_keyboard_input() -> Result<()> {
     println!("任意のキーを押してください。Escapeキーで終了します。\n");
 
     // Waylandコンポジタへの接続
-    let conn = Connection::connect_to_env()
-        .context("Waylandコンポジタへの接続に失敗")?;
+    let conn = Connection::connect_to_env().context("Waylandコンポジタへの接続に失敗")?;
 
     // イベントキューとグローバルの初期化
-    let (globals, mut event_queue) = registry_queue_init::<AppState>(&conn)
-        .context("グローバルレジストリの取得に失敗")?;
+    let (globals, mut event_queue) =
+        registry_queue_init::<AppState>(&conn).context("グローバルレジストリの取得に失敗")?;
 
     let qh = event_queue.handle();
 
@@ -115,8 +114,8 @@ fn test_keyboard_input() -> Result<()> {
     event_queue.roundtrip(&mut state)?;
 
     // 小さなバッファを作成して表示（入力受付中の視覚的フィードバック）
-    let buffer = create_indicator_buffer(&shm, &qh, 200, 100)
-        .context("インジケータバッファの作成に失敗")?;
+    let buffer =
+        create_indicator_buffer(&shm, &qh, 200, 100).context("インジケータバッファの作成に失敗")?;
     surface.attach(Some(&buffer), 0, 0);
     surface.damage_buffer(0, 0, 200, 100);
     surface.commit();
@@ -147,25 +146,16 @@ fn create_indicator_buffer(
     let stride = width * 4;
     let size = stride * height;
 
-    let file = tempfile::tempfile()
-        .context("一時ファイルの作成に失敗")?;
+    let file = tempfile::tempfile().context("一時ファイルの作成に失敗")?;
 
-    nix::unistd::ftruncate(&file, size as i64)
-        .context("ファイルサイズの設定に失敗")?;
+    nix::unistd::ftruncate(&file, size as i64).context("ファイルサイズの設定に失敗")?;
 
-    let mmap = unsafe {
-        memmap2::MmapMut::map_mut(&file)
-            .context("メモリマップに失敗")?
-    };
+    let mmap = unsafe { memmap2::MmapMut::map_mut(&file).context("メモリマップに失敗")? };
 
     // 半透明の緑色（入力受付中を示す）
     let color: u32 = 0xA000FF00; // A=0xA0 (半透明), R=0x00, G=0xFF, B=0x00
-    let pixels = unsafe {
-        std::slice::from_raw_parts_mut(
-            mmap.as_ptr() as *mut u32,
-            (size / 4) as usize,
-        )
-    };
+    let pixels =
+        unsafe { std::slice::from_raw_parts_mut(mmap.as_ptr() as *mut u32, (size / 4) as usize) };
 
     for pixel in pixels.iter_mut() {
         *pixel = color;
@@ -212,7 +202,8 @@ impl Dispatch<wl_registry::WlRegistry, GlobalListContents> for AppState {
         _data: &GlobalListContents,
         _conn: &Connection,
         _qh: &QueueHandle<Self>,
-    ) {}
+    ) {
+    }
 }
 
 impl Dispatch<wl_compositor::WlCompositor, ()> for AppState {
@@ -223,7 +214,8 @@ impl Dispatch<wl_compositor::WlCompositor, ()> for AppState {
         _data: &(),
         _conn: &Connection,
         _qh: &QueueHandle<Self>,
-    ) {}
+    ) {
+    }
 }
 
 impl Dispatch<wl_surface::WlSurface, ()> for AppState {
@@ -234,7 +226,8 @@ impl Dispatch<wl_surface::WlSurface, ()> for AppState {
         _data: &(),
         _conn: &Connection,
         _qh: &QueueHandle<Self>,
-    ) {}
+    ) {
+    }
 }
 
 impl Dispatch<wl_shm::WlShm, ()> for AppState {
@@ -245,7 +238,8 @@ impl Dispatch<wl_shm::WlShm, ()> for AppState {
         _data: &(),
         _conn: &Connection,
         _qh: &QueueHandle<Self>,
-    ) {}
+    ) {
+    }
 }
 
 impl Dispatch<wayland_client::protocol::wl_shm_pool::WlShmPool, ()> for AppState {
@@ -256,7 +250,8 @@ impl Dispatch<wayland_client::protocol::wl_shm_pool::WlShmPool, ()> for AppState
         _data: &(),
         _conn: &Connection,
         _qh: &QueueHandle<Self>,
-    ) {}
+    ) {
+    }
 }
 
 impl Dispatch<wayland_client::protocol::wl_buffer::WlBuffer, ()> for AppState {
@@ -267,7 +262,8 @@ impl Dispatch<wayland_client::protocol::wl_buffer::WlBuffer, ()> for AppState {
         _data: &(),
         _conn: &Connection,
         _qh: &QueueHandle<Self>,
-    ) {}
+    ) {
+    }
 }
 
 impl Dispatch<ZwlrLayerShellV1, ()> for AppState {
@@ -278,7 +274,8 @@ impl Dispatch<ZwlrLayerShellV1, ()> for AppState {
         _data: &(),
         _conn: &Connection,
         _qh: &QueueHandle<Self>,
-    ) {}
+    ) {
+    }
 }
 
 impl Dispatch<ZwlrLayerSurfaceV1, ()> for AppState {
@@ -308,7 +305,8 @@ impl Dispatch<wl_seat::WlSeat, ()> for AppState {
         _data: &(),
         _conn: &Connection,
         _qh: &QueueHandle<Self>,
-    ) {}
+    ) {
+    }
 }
 
 impl Dispatch<wl_keyboard::WlKeyboard, ()> for AppState {
@@ -332,16 +330,21 @@ impl Dispatch<wl_keyboard::WlKeyboard, ()> for AppState {
                             nix::sys::mman::MapFlags::MAP_PRIVATE,
                             fd.as_fd(),
                             0,
-                        ).expect("mmapに失敗");
+                        )
+                        .expect("mmapに失敗");
 
-                        let slice = std::slice::from_raw_parts(ptr.as_ptr() as *const u8, size as usize - 1);
+                        let slice = std::slice::from_raw_parts(
+                            ptr.as_ptr() as *const u8,
+                            size as usize - 1,
+                        );
                         let keymap_str = std::str::from_utf8_unchecked(slice);
                         let keymap = xkb::Keymap::new_from_string(
                             &state.xkb_context,
                             keymap_str.to_string(),
                             xkb::KEYMAP_FORMAT_TEXT_V1,
                             xkb::KEYMAP_COMPILE_NO_FLAGS,
-                        ).expect("キーマップの作成に失敗");
+                        )
+                        .expect("キーマップの作成に失敗");
 
                         nix::sys::mman::munmap(ptr, size as usize).expect("munmapに失敗");
                         keymap
@@ -352,17 +355,24 @@ impl Dispatch<wl_keyboard::WlKeyboard, ()> for AppState {
                 }
             }
 
-            wl_keyboard::Event::Key { key, state: key_state, .. } => {
+            wl_keyboard::Event::Key {
+                key,
+                state: key_state,
+                ..
+            } => {
                 if let Some(xkb_state) = &mut state.xkb_state {
                     let keycode = key + 8; // Waylandキーコード → xkbキーコード
 
-                    if let wayland_client::WEnum::Value(wl_keyboard::KeyState::Pressed) = key_state {
+                    if let wayland_client::WEnum::Value(wl_keyboard::KeyState::Pressed) = key_state
+                    {
                         // キーシンボルを取得
                         let keysym = xkb_state.key_get_one_sym(xkb::Keycode::from(keycode));
                         let keysym_name = xkb::keysym_get_name(keysym);
 
-                        println!("キー押下: {} (keycode: {}, keysym: {:?})",
-                            keysym_name, keycode, keysym);
+                        println!(
+                            "キー押下: {} (keycode: {}, keysym: {:?})",
+                            keysym_name, keycode, keysym
+                        );
 
                         // Escapeキーで終了
                         if keysym == xkb::keysyms::KEY_Escape.into() {
@@ -373,7 +383,13 @@ impl Dispatch<wl_keyboard::WlKeyboard, ()> for AppState {
                 }
             }
 
-            wl_keyboard::Event::Modifiers { mods_depressed, mods_latched, mods_locked, group, .. } => {
+            wl_keyboard::Event::Modifiers {
+                mods_depressed,
+                mods_latched,
+                mods_locked,
+                group,
+                ..
+            } => {
                 if let Some(xkb_state) = &mut state.xkb_state {
                     xkb_state.update_mask(mods_depressed, mods_latched, mods_locked, 0, 0, group);
                 }

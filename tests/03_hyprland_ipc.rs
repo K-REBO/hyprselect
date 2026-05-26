@@ -75,8 +75,10 @@ fn test_get_windows() -> Result<()> {
         println!("\nウィンドウ {}: {}", i + 1, client.title);
         println!("  アドレス: {}", client.address);
         println!("  クラス: {}", client.class);
-        println!("  ワークスペース: {} (ID: {})",
-            client.workspace.name, client.workspace.id);
+        println!(
+            "  ワークスペース: {} (ID: {})",
+            client.workspace.name, client.workspace.id
+        );
         println!("  モニター: {:?}", client.monitor);
         println!("  位置: ({}, {})", client.at.0, client.at.1);
         println!("  サイズ: {}x{}", client.size.0, client.size.1);
@@ -109,9 +111,10 @@ fn test_get_monitors() -> Result<()> {
         println!("  リフレッシュレート: {:.2} Hz", monitor.refresh_rate);
         println!("  スケール: {:.2}", monitor.scale);
         println!("  位置: ({}, {})", monitor.x, monitor.y);
-        println!("  アクティブワークスペース: {} (ID: {})",
-            monitor.active_workspace.name,
-            monitor.active_workspace.id);
+        println!(
+            "  アクティブワークスペース: {} (ID: {})",
+            monitor.active_workspace.name, monitor.active_workspace.id
+        );
     }
 
     Ok(())
@@ -124,8 +127,8 @@ fn test_filter_visible_windows() -> Result<()> {
     use hyprland::prelude::*;
 
     // アクティブワークスペースを取得
-    let active_workspace = Workspace::get_active()
-        .context("アクティブワークスペースの取得に失敗")?;
+    let active_workspace =
+        Workspace::get_active().context("アクティブワークスペースの取得に失敗")?;
 
     println!("アクティブワークスペース:");
     println!("  ID: {}", active_workspace.id);
@@ -140,10 +143,8 @@ fn test_filter_visible_windows() -> Result<()> {
     let monitors = Monitors::get().context("モニター情報の取得に失敗")?;
     let monitor_vec = monitors.to_vec();
 
-    let visible_workspace_ids: Vec<i32> = monitor_vec
-        .iter()
-        .map(|m| m.active_workspace.id)
-        .collect();
+    let visible_workspace_ids: Vec<i32> =
+        monitor_vec.iter().map(|m| m.active_workspace.id).collect();
 
     println!("\n可視ワークスペースID: {:?}", visible_workspace_ids);
 
@@ -158,7 +159,8 @@ fn test_filter_visible_windows() -> Result<()> {
 
     println!("\n可視タイル一覧:");
     for (i, client) in visible_clients.iter().enumerate() {
-        println!("  {}. [{}] {} ({}x{} at {},{}) - WS: {}",
+        println!(
+            "  {}. [{}] {} ({}x{} at {},{}) - WS: {}",
             i + 1,
             client.class,
             client.title,
@@ -209,10 +211,8 @@ fn test_focus() -> Result<()> {
     let monitors = Monitors::get().context("モニター情報の取得に失敗")?;
     let monitor_vec = monitors.to_vec();
 
-    let visible_workspace_ids: Vec<i32> = monitor_vec
-        .iter()
-        .map(|m| m.active_workspace.id)
-        .collect();
+    let visible_workspace_ids: Vec<i32> =
+        monitor_vec.iter().map(|m| m.active_workspace.id).collect();
 
     let visible_clients: Vec<_> = all_clients_vec
         .iter()
@@ -234,7 +234,8 @@ fn test_focus() -> Result<()> {
 
     // アクティブでない可視タイルを探す
     let target = if let Some(active_window) = &active {
-        visible_clients.iter()
+        visible_clients
+            .iter()
             .find(|c| c.address != active_window.address)
             .unwrap_or(&visible_clients[0])
     } else {

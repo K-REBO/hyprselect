@@ -21,9 +21,9 @@ use hyprland::prelude::*;
 
 // Waylandクライアントライブラリ
 use wayland_client::{
-    Connection, Dispatch, QueueHandle,
-    protocol::{wl_compositor, wl_registry, wl_shm, wl_buffer, wl_surface, wl_shm_pool},
     globals::{registry_queue_init, GlobalListContents},
+    protocol::{wl_buffer, wl_compositor, wl_registry, wl_shm, wl_shm_pool, wl_surface},
+    Connection, Dispatch, QueueHandle,
 };
 
 use wayland_protocols_wlr::layer_shell::v1::client::{
@@ -55,7 +55,8 @@ impl Dispatch<wl_registry::WlRegistry, GlobalListContents> for AppState {
         _: &GlobalListContents,
         _: &Connection,
         _: &QueueHandle<Self>,
-    ) {}
+    ) {
+    }
 }
 
 impl Dispatch<wl_compositor::WlCompositor, ()> for AppState {
@@ -66,7 +67,8 @@ impl Dispatch<wl_compositor::WlCompositor, ()> for AppState {
         _: &(),
         _: &Connection,
         _: &QueueHandle<Self>,
-    ) {}
+    ) {
+    }
 }
 
 impl Dispatch<wl_surface::WlSurface, ()> for AppState {
@@ -77,7 +79,8 @@ impl Dispatch<wl_surface::WlSurface, ()> for AppState {
         _: &(),
         _: &Connection,
         _: &QueueHandle<Self>,
-    ) {}
+    ) {
+    }
 }
 
 impl Dispatch<wl_shm::WlShm, ()> for AppState {
@@ -88,7 +91,8 @@ impl Dispatch<wl_shm::WlShm, ()> for AppState {
         _: &(),
         _: &Connection,
         _: &QueueHandle<Self>,
-    ) {}
+    ) {
+    }
 }
 
 impl Dispatch<wl_shm_pool::WlShmPool, ()> for AppState {
@@ -99,7 +103,8 @@ impl Dispatch<wl_shm_pool::WlShmPool, ()> for AppState {
         _: &(),
         _: &Connection,
         _: &QueueHandle<Self>,
-    ) {}
+    ) {
+    }
 }
 
 impl Dispatch<wl_buffer::WlBuffer, ()> for AppState {
@@ -110,7 +115,8 @@ impl Dispatch<wl_buffer::WlBuffer, ()> for AppState {
         _: &(),
         _: &Connection,
         _: &QueueHandle<Self>,
-    ) {}
+    ) {
+    }
 }
 
 impl Dispatch<zwlr_layer_shell_v1::ZwlrLayerShellV1, ()> for AppState {
@@ -121,7 +127,8 @@ impl Dispatch<zwlr_layer_shell_v1::ZwlrLayerShellV1, ()> for AppState {
         _: &(),
         _: &Connection,
         _: &QueueHandle<Self>,
-    ) {}
+    ) {
+    }
 }
 
 impl Dispatch<zwlr_layer_surface_v1::ZwlrLayerSurfaceV1, usize> for AppState {
@@ -151,16 +158,16 @@ fn create_solid_buffer(
     let size = stride * height;
 
     let temp_file = tempfile::tempfile().context("一時ファイルの作成に失敗")?;
-    temp_file.set_len(size as u64).context("ファイルサイズの設定に失敗")?;
+    temp_file
+        .set_len(size as u64)
+        .context("ファイルサイズの設定に失敗")?;
 
-    let mut mmap = unsafe {
-        memmap2::MmapMut::map_mut(&temp_file).context("mmapに失敗")?
-    };
+    let mut mmap = unsafe { memmap2::MmapMut::map_mut(&temp_file).context("mmapに失敗")? };
 
     // ARGB8888形式で塗りつぶし
     for pixel in mmap.chunks_exact_mut(4) {
-        pixel[0] = (color_argb & 0xFF) as u8;         // B
-        pixel[1] = ((color_argb >> 8) & 0xFF) as u8;  // G
+        pixel[0] = (color_argb & 0xFF) as u8; // B
+        pixel[1] = ((color_argb >> 8) & 0xFF) as u8; // G
         pixel[2] = ((color_argb >> 16) & 0xFF) as u8; // R
         pixel[3] = ((color_argb >> 24) & 0xFF) as u8; // A
     }
@@ -168,15 +175,7 @@ fn create_solid_buffer(
     drop(mmap);
 
     let pool = shm.create_pool(temp_file.as_fd(), size, qh, ());
-    let buffer = pool.create_buffer(
-        0,
-        width,
-        height,
-        stride,
-        wl_shm::Format::Argb8888,
-        qh,
-        (),
-    );
+    let buffer = pool.create_buffer(0, width, height, stride, wl_shm::Format::Argb8888, qh, ());
 
     pool.destroy();
     Ok(buffer)
@@ -196,10 +195,8 @@ fn main() -> Result<()> {
     let monitor_vec = monitors.to_vec();
 
     // アクティブなワークスペースIDを取得
-    let visible_workspace_ids: Vec<i32> = monitor_vec
-        .iter()
-        .map(|m| m.active_workspace.id)
-        .collect();
+    let visible_workspace_ids: Vec<i32> =
+        monitor_vec.iter().map(|m| m.active_workspace.id).collect();
 
     // 可視タイルのみをフィルタ
     let visible_clients: Vec<_> = client_vec
@@ -210,9 +207,15 @@ fn main() -> Result<()> {
     println!("✓ 可視タイル数: {}", visible_clients.len());
 
     for (i, client) in visible_clients.iter().enumerate() {
-        println!("  タイル{}: {} - 位置({}, {}) サイズ{}x{}",
-            i + 1, client.title, client.at.0, client.at.1,
-            client.size.0, client.size.1);
+        println!(
+            "  タイル{}: {} - 位置({}, {}) サイズ{}x{}",
+            i + 1,
+            client.title,
+            client.at.0,
+            client.at.1,
+            client.size.0,
+            client.size.1
+        );
     }
 
     if visible_clients.is_empty() {
@@ -226,8 +229,8 @@ fn main() -> Result<()> {
 
     let conn = Connection::connect_to_env().context("Waylandへの接続に失敗")?;
 
-    let (globals, mut event_queue) = registry_queue_init::<AppState>(&conn)
-        .context("グローバルレジストリの取得に失敗")?;
+    let (globals, mut event_queue) =
+        registry_queue_init::<AppState>(&conn).context("グローバルレジストリの取得に失敗")?;
 
     let qh = event_queue.handle();
 

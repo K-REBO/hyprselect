@@ -21,9 +21,9 @@ use hyprland::prelude::*;
 
 // Waylandクライアントライブラリ
 use wayland_client::{
-    Connection, Dispatch, QueueHandle,
-    protocol::{wl_compositor, wl_registry, wl_shm, wl_buffer, wl_surface, wl_shm_pool},
     globals::{registry_queue_init, GlobalListContents},
+    protocol::{wl_buffer, wl_compositor, wl_registry, wl_shm, wl_shm_pool, wl_surface},
+    Connection, Dispatch, QueueHandle,
 };
 
 use wayland_protocols_wlr::layer_shell::v1::client::{
@@ -43,7 +43,8 @@ impl Dispatch<wl_registry::WlRegistry, GlobalListContents> for AppState {
         _: &GlobalListContents,
         _: &Connection,
         _: &QueueHandle<Self>,
-    ) {}
+    ) {
+    }
 }
 
 impl Dispatch<wl_compositor::WlCompositor, ()> for AppState {
@@ -54,7 +55,8 @@ impl Dispatch<wl_compositor::WlCompositor, ()> for AppState {
         _: &(),
         _: &Connection,
         _: &QueueHandle<Self>,
-    ) {}
+    ) {
+    }
 }
 
 impl Dispatch<wl_surface::WlSurface, ()> for AppState {
@@ -65,7 +67,8 @@ impl Dispatch<wl_surface::WlSurface, ()> for AppState {
         _: &(),
         _: &Connection,
         _: &QueueHandle<Self>,
-    ) {}
+    ) {
+    }
 }
 
 impl Dispatch<wl_shm::WlShm, ()> for AppState {
@@ -76,7 +79,8 @@ impl Dispatch<wl_shm::WlShm, ()> for AppState {
         _: &(),
         _: &Connection,
         _: &QueueHandle<Self>,
-    ) {}
+    ) {
+    }
 }
 
 impl Dispatch<wl_shm_pool::WlShmPool, ()> for AppState {
@@ -87,7 +91,8 @@ impl Dispatch<wl_shm_pool::WlShmPool, ()> for AppState {
         _: &(),
         _: &Connection,
         _: &QueueHandle<Self>,
-    ) {}
+    ) {
+    }
 }
 
 impl Dispatch<wl_buffer::WlBuffer, ()> for AppState {
@@ -98,7 +103,8 @@ impl Dispatch<wl_buffer::WlBuffer, ()> for AppState {
         _: &(),
         _: &Connection,
         _: &QueueHandle<Self>,
-    ) {}
+    ) {
+    }
 }
 
 impl Dispatch<zwlr_layer_shell_v1::ZwlrLayerShellV1, ()> for AppState {
@@ -109,7 +115,8 @@ impl Dispatch<zwlr_layer_shell_v1::ZwlrLayerShellV1, ()> for AppState {
         _: &(),
         _: &Connection,
         _: &QueueHandle<Self>,
-    ) {}
+    ) {
+    }
 }
 
 impl Dispatch<zwlr_layer_surface_v1::ZwlrLayerSurfaceV1, ()> for AppState {
@@ -149,11 +156,11 @@ fn create_buffer_with_boxes(
     let size = stride * screen_height;
 
     let temp_file = tempfile::tempfile().context("一時ファイルの作成に失敗")?;
-    temp_file.set_len(size as u64).context("ファイルサイズの設定に失敗")?;
+    temp_file
+        .set_len(size as u64)
+        .context("ファイルサイズの設定に失敗")?;
 
-    let mut mmap = unsafe {
-        memmap2::MmapMut::map_mut(&temp_file).context("mmapに失敗")?
-    };
+    let mut mmap = unsafe { memmap2::MmapMut::map_mut(&temp_file).context("mmapに失敗")? };
 
     // 全体を透明に初期化 (ARGB: 0x00000000)
     for pixel in mmap.chunks_exact_mut(4) {
@@ -181,8 +188,8 @@ fn create_buffer_with_boxes(
             for x in x_start..x_end {
                 let offset = ((y * screen_width + x) * 4) as usize;
                 if offset + 3 < mmap.len() {
-                    mmap[offset + 0] = (box_color_argb & 0xFF) as u8;         // B
-                    mmap[offset + 1] = ((box_color_argb >> 8) & 0xFF) as u8;  // G
+                    mmap[offset + 0] = (box_color_argb & 0xFF) as u8; // B
+                    mmap[offset + 1] = ((box_color_argb >> 8) & 0xFF) as u8; // G
                     mmap[offset + 2] = ((box_color_argb >> 16) & 0xFF) as u8; // R
                     mmap[offset + 3] = ((box_color_argb >> 24) & 0xFF) as u8; // A
                 }
@@ -221,10 +228,8 @@ fn main() -> Result<()> {
     let monitor_vec = monitors.to_vec();
 
     // アクティブなワークスペースIDを取得
-    let visible_workspace_ids: Vec<i32> = monitor_vec
-        .iter()
-        .map(|m| m.active_workspace.id)
-        .collect();
+    let visible_workspace_ids: Vec<i32> =
+        monitor_vec.iter().map(|m| m.active_workspace.id).collect();
 
     // 可視タイルのみをフィルタ
     let visible_clients: Vec<_> = client_vec
@@ -237,8 +242,10 @@ fn main() -> Result<()> {
     let tiles: Vec<TileInfo> = visible_clients
         .iter()
         .map(|c| {
-            println!("  タイル: {} - 位置({}, {}) サイズ{}x{}",
-                c.title, c.at.0, c.at.1, c.size.0, c.size.1);
+            println!(
+                "  タイル: {} - 位置({}, {}) サイズ{}x{}",
+                c.title, c.at.0, c.at.1, c.size.0, c.size.1
+            );
             TileInfo {
                 x: c.at.0 as i32,
                 y: c.at.1 as i32,
@@ -264,8 +271,8 @@ fn main() -> Result<()> {
 
     let conn = Connection::connect_to_env().context("Waylandへの接続に失敗")?;
 
-    let (globals, mut event_queue) = registry_queue_init::<AppState>(&conn)
-        .context("グローバルレジストリの取得に失敗")?;
+    let (globals, mut event_queue) =
+        registry_queue_init::<AppState>(&conn).context("グローバルレジストリの取得に失敗")?;
 
     let qh = event_queue.handle();
 
@@ -283,9 +290,7 @@ fn main() -> Result<()> {
 
     println!("✓ Waylandグローバルをバインド");
 
-    let mut state = AppState {
-        configured: false,
-    };
+    let mut state = AppState { configured: false };
 
     // 画面全体を覆うサーフェスを作成
     let surface = compositor.create_surface(&qh, ());

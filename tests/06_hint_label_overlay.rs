@@ -24,12 +24,12 @@ use hyprland::dispatch::{Dispatch as HyprDispatch, DispatchType, WindowIdentifie
 use hyprland::prelude::*;
 
 use wayland_client::{
-    Connection, Dispatch, QueueHandle,
-    globals::{GlobalListContents, registry_queue_init},
+    globals::{registry_queue_init, GlobalListContents},
     protocol::{
         wl_buffer, wl_compositor, wl_keyboard, wl_registry, wl_seat, wl_shm, wl_shm_pool,
         wl_surface,
     },
+    Connection, Dispatch, QueueHandle,
 };
 
 use wayland_protocols_wlr::layer_shell::v1::client::{
@@ -209,8 +209,10 @@ impl Dispatch<wl_keyboard::WlKeyboard, ()> for AppState {
                         )
                         .expect("mmapに失敗");
 
-                        let slice =
-                            std::slice::from_raw_parts(ptr.as_ptr() as *const u8, size as usize - 1);
+                        let slice = std::slice::from_raw_parts(
+                            ptr.as_ptr() as *const u8,
+                            size as usize - 1,
+                        );
                         let keymap_str = std::str::from_utf8_unchecked(slice);
                         let keymap = xkb::Keymap::new_from_string(
                             &state.xkb_context,
@@ -253,7 +255,10 @@ impl Dispatch<wl_keyboard::WlKeyboard, ()> for AppState {
                                 println!("\nキー '{}' が押されました → '{}'", ch, tile.title);
                                 state.selected_address = Some(tile.address.clone());
                             } else {
-                                println!("\nキー '{}': ヒントに一致しません。キャンセルします。", ch);
+                                println!(
+                                    "\nキー '{}': ヒントに一致しません。キャンセルします。",
+                                    ch
+                                );
                             }
                         }
 
@@ -317,7 +322,9 @@ fn draw_hint_overlay(
             cr.select_font_face("Mono", cairo::FontSlant::Normal, cairo::FontWeight::Bold);
             cr.set_font_size(52.0);
 
-            let extents = cr.text_extents(&label).context("テキストサイズ測定に失敗")?;
+            let extents = cr
+                .text_extents(&label)
+                .context("テキストサイズ測定に失敗")?;
             let tx = bx + (box_w - extents.width()) / 2.0 - extents.x_bearing();
             let ty = by + (box_h - extents.height()) / 2.0 - extents.y_bearing();
 
@@ -336,9 +343,8 @@ fn draw_hint_overlay(
         .set_len(size as u64)
         .context("ファイルサイズの設定に失敗")?;
 
-    let mut mmap = unsafe {
-        memmap2::MmapMut::map_mut(&temp_file).context("メモリマップに失敗")?
-    };
+    let mut mmap =
+        unsafe { memmap2::MmapMut::map_mut(&temp_file).context("メモリマップに失敗")? };
 
     mmap.copy_from_slice(&cairo_data);
     drop(mmap);
@@ -371,10 +377,8 @@ fn main() -> Result<()> {
     let monitors = Monitors::get().context("モニター情報の取得に失敗")?;
     let monitor_vec = monitors.to_vec();
 
-    let visible_workspace_ids: Vec<i32> = monitor_vec
-        .iter()
-        .map(|m| m.active_workspace.id)
-        .collect();
+    let visible_workspace_ids: Vec<i32> =
+        monitor_vec.iter().map(|m| m.active_workspace.id).collect();
 
     let visible_clients: Vec<_> = client_vec
         .iter()
@@ -407,37 +411,38 @@ fn main() -> Result<()> {
         })
         .collect();
 
-    let screen_width = monitor_vec
-        .iter()
-        .map(|m| m.width)
-        .max()
-        .unwrap_or(1920) as i32;
-    let screen_height = monitor_vec
-        .iter()
-        .map(|m| m.height)
-        .max()
-        .unwrap_or(1080) as i32;
+    let screen_width = monitor_vec.iter().map(|m| m.width).max().unwrap_or(1920) as i32;
+    let screen_height = monitor_vec.iter().map(|m| m.height).max().unwrap_or(1080) as i32;
 
-    println!("\n✓ {}個のタイルを取得（画面: {}x{}）", tiles.len(), screen_width, screen_height);
+    println!(
+        "\n✓ {}個のタイルを取得（画面: {}x{}）",
+        tiles.len(),
+        screen_width,
+        screen_height
+    );
 
     // Step 2: Wayland接続とオーバーレイ作成
     println!("\n【Step 2】ヒントラベルオーバーレイを表示");
     println!("{}", "-".repeat(50));
 
     let conn = Connection::connect_to_env().context("Waylandへの接続に失敗")?;
-    let (globals, mut event_queue) = registry_queue_init::<AppState>(&conn)
-        .context("グローバルレジストリの取得に失敗")?;
+    let (globals, mut event_queue) =
+        registry_queue_init::<AppState>(&conn).context("グローバルレジストリの取得に失敗")?;
 
     let qh = event_queue.handle();
 
-    let compositor: wl_compositor::WlCompositor =
-        globals.bind(&qh, 4..=6, ()).context("wl_compositorのバインドに失敗")?;
-    let shm: wl_shm::WlShm =
-        globals.bind(&qh, 1..=1, ()).context("wl_shmのバインドに失敗")?;
-    let layer_shell: zwlr_layer_shell_v1::ZwlrLayerShellV1 =
-        globals.bind(&qh, 1..=4, ()).context("zwlr_layer_shell_v1のバインドに失敗")?;
-    let seat: wl_seat::WlSeat =
-        globals.bind(&qh, 7..=9, ()).context("wl_seatのバインドに失敗")?;
+    let compositor: wl_compositor::WlCompositor = globals
+        .bind(&qh, 4..=6, ())
+        .context("wl_compositorのバインドに失敗")?;
+    let shm: wl_shm::WlShm = globals
+        .bind(&qh, 1..=1, ())
+        .context("wl_shmのバインドに失敗")?;
+    let layer_shell: zwlr_layer_shell_v1::ZwlrLayerShellV1 = globals
+        .bind(&qh, 1..=4, ())
+        .context("zwlr_layer_shell_v1のバインドに失敗")?;
+    let seat: wl_seat::WlSeat = globals
+        .bind(&qh, 7..=9, ())
+        .context("wl_seatのバインドに失敗")?;
 
     println!("✓ Waylandグローバルをバインド");
 

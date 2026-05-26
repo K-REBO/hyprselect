@@ -17,10 +17,8 @@ pub fn get_windows() -> Result<Vec<DesktopWindow>> {
     let monitor_vec = monitors.to_vec();
 
     // Collect active workspace IDs from all monitors
-    let visible_workspace_ids: Vec<i32> = monitor_vec
-        .iter()
-        .map(|m| m.active_workspace.id)
-        .collect();
+    let visible_workspace_ids: Vec<i32> =
+        monitor_vec.iter().map(|m| m.active_workspace.id).collect();
 
     debug!("Visible workspace IDs: {:?}", visible_workspace_ids);
 
@@ -69,7 +67,10 @@ fn compute_client_id(address: &hyprland::shared::Address) -> i64 {
 
 /// Focus a specific window by its ID.
 pub fn focus_window(window: &DesktopWindow) -> Result<()> {
-    debug!("focus_window called with ID: {}, pos: {:?}", window.id, window.pos);
+    debug!(
+        "focus_window called with ID: {}, pos: {:?}",
+        window.id, window.pos
+    );
 
     let clients = Clients::get().context("Failed to get clients")?;
     let client_vec = clients.to_vec();
@@ -77,8 +78,13 @@ pub fn focus_window(window: &DesktopWindow) -> Result<()> {
     // Debug: print all client IDs
     for c in &client_vec {
         let cid = compute_client_id(&c.address);
-        debug!("Client: {} (ws {}), ID: {}, match: {}",
-               c.title, c.workspace.id, cid, cid == window.id);
+        debug!(
+            "Client: {} (ws {}), ID: {}, match: {}",
+            c.title,
+            c.workspace.id,
+            cid,
+            cid == window.id
+        );
     }
 
     // Find the client that matches this window's ID (hash of address)

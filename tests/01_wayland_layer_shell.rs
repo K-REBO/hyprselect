@@ -9,21 +9,21 @@
 //   - Waylandコンポジタ（Hyprland）が起動していること
 //   - WAYLAND_DISPLAY環境変数が設定されていること
 
-use anyhow::{Context, Result, bail};
+use anyhow::{bail, Context, Result};
 use std::os::fd::AsFd;
 use std::time::Duration;
 
 // Waylandクライアントライブラリ
 use wayland_client::{
-    Connection, Dispatch, QueueHandle,
-    protocol::{wl_compositor, wl_shm, wl_shm_pool, wl_surface, wl_buffer, wl_output, wl_registry},
     globals::{registry_queue_init, GlobalListContents},
+    protocol::{wl_buffer, wl_compositor, wl_output, wl_registry, wl_shm, wl_shm_pool, wl_surface},
+    Connection, Dispatch, QueueHandle,
 };
 
 // Layer Shellプロトコル
 use wayland_protocols_wlr::layer_shell::v1::client::{
     zwlr_layer_shell_v1::{self, ZwlrLayerShellV1},
-    zwlr_layer_surface_v1::{self, ZwlrLayerSurfaceV1, Anchor, KeyboardInteractivity},
+    zwlr_layer_surface_v1::{self, Anchor, KeyboardInteractivity, ZwlrLayerSurfaceV1},
 };
 
 fn main() -> Result<()> {
@@ -54,27 +54,34 @@ fn main() -> Result<()> {
 /// テスト1: Wayland接続テスト
 fn test_wayland_connection() -> Result<()> {
     // WAYLAND_DISPLAY環境変数の確認
-    let display_name = std::env::var("WAYLAND_DISPLAY")
-        .unwrap_or_else(|_| "wayland-0".to_string());
+    let display_name = std::env::var("WAYLAND_DISPLAY").unwrap_or_else(|_| "wayland-0".to_string());
     println!("WAYLAND_DISPLAY: {}", display_name);
 
     // Waylandコンポジタへの接続
-    let conn = Connection::connect_to_env()
-        .context("Waylandコンポジタへの接続に失敗")?;
+    let conn = Connection::connect_to_env().context("Waylandコンポジタへの接続に失敗")?;
     println!("✓ Waylandコンポジタに接続成功");
 
     // グローバルレジストリの取得
-    let (globals, _) = registry_queue_init::<AppState>(&conn)
-        .context("グローバルレジストリの取得に失敗")?;
+    let (globals, _) =
+        registry_queue_init::<AppState>(&conn).context("グローバルレジストリの取得に失敗")?;
 
     println!("\n利用可能なWaylandグローバル:");
 
     // 各グローバルの確認
-    let has_compositor = globals.contents().clone_list().iter()
+    let has_compositor = globals
+        .contents()
+        .clone_list()
+        .iter()
         .any(|g| g.interface == "wl_compositor");
-    let has_shm = globals.contents().clone_list().iter()
+    let has_shm = globals
+        .contents()
+        .clone_list()
+        .iter()
         .any(|g| g.interface == "wl_shm");
-    let has_layer_shell = globals.contents().clone_list().iter()
+    let has_layer_shell = globals
+        .contents()
+        .clone_list()
+        .iter()
         .any(|g| g.interface == "zwlr_layer_shell_v1");
 
     if has_compositor {
@@ -106,12 +113,11 @@ fn test_layer_shell() -> Result<()> {
     println!("単一の透明オーバーレイを3秒間表示します...\n");
 
     // Waylandコンポジタへの接続
-    let conn = Connection::connect_to_env()
-        .context("Waylandコンポジタへの接続に失敗")?;
+    let conn = Connection::connect_to_env().context("Waylandコンポジタへの接続に失敗")?;
 
     // イベントキューとグローバルの初期化
-    let (globals, mut event_queue) = registry_queue_init::<AppState>(&conn)
-        .context("グローバルレジストリの取得に失敗")?;
+    let (globals, mut event_queue) =
+        registry_queue_init::<AppState>(&conn).context("グローバルレジストリの取得に失敗")?;
 
     let qh = event_queue.handle();
 
@@ -138,7 +144,7 @@ fn test_layer_shell() -> Result<()> {
     // Layer Surfaceの作成
     let layer_surface = layer_shell.get_layer_surface(
         &surface,
-        None, // 特定のoutputを指定しない（デフォルト）
+        None,                                // 特定のoutputを指定しない（デフォルト）
         zwlr_layer_shell_v1::Layer::Overlay, // 最前面
         "hyprselect_test".to_string(),
         &qh,
@@ -179,7 +185,10 @@ fn test_layer_shell() -> Result<()> {
 
     // イベントループを実行
     println!("\nオーバーレイを表示中...");
-    println!("（画面中央に{}x{}の半透明な灰色の矩形が表示されるはずです）", width, height);
+    println!(
+        "（画面中央に{}x{}の半透明な灰色の矩形が表示されるはずです）",
+        width, height
+    );
 
     // 初期イベント処理
     let mut state = AppState::new();
@@ -200,12 +209,11 @@ fn test_cairo_text_rendering() -> Result<()> {
     println!("Cairoでテキストを描画したオーバーレイを3秒間表示します...\n");
 
     // Waylandコンポジタへの接続
-    let conn = Connection::connect_to_env()
-        .context("Waylandコンポジタへの接続に失敗")?;
+    let conn = Connection::connect_to_env().context("Waylandコンポジタへの接続に失敗")?;
 
     // イベントキューとグローバルの初期化
-    let (globals, mut event_queue) = registry_queue_init::<AppState>(&conn)
-        .context("グローバルレジストリの取得に失敗")?;
+    let (globals, mut event_queue) =
+        registry_queue_init::<AppState>(&conn).context("グローバルレジストリの取得に失敗")?;
 
     let qh = event_queue.handle();
 
@@ -287,41 +295,27 @@ fn create_shm_buffer(
     let size = stride * height;
 
     // 一時ファイルを作成（共有メモリ用）
-    let file = tempfile::tempfile()
-        .context("一時ファイルの作成に失敗")?;
+    let file = tempfile::tempfile().context("一時ファイルの作成に失敗")?;
 
     // ファイルサイズを設定
-    nix::unistd::ftruncate(&file, size as i64)
-        .context("ファイルサイズの設定に失敗")?;
+    nix::unistd::ftruncate(&file, size as i64).context("ファイルサイズの設定に失敗")?;
 
     // メモリマップ
-    let mmap = unsafe {
-        memmap2::MmapMut::map_mut(&file)
-            .context("メモリマップに失敗")?
-    };
+    let mmap = unsafe { memmap2::MmapMut::map_mut(&file).context("メモリマップに失敗")? };
 
     // バッファに半透明グレーを描画（ARGB8888形式）
     // フォーマット: 0xAARRGGBB
     let color: u32 = 0x80808080; // 半透明グレー (A=0x80, R=0x80, G=0x80, B=0x80)
 
-    let pixels = unsafe {
-        std::slice::from_raw_parts_mut(
-            mmap.as_ptr() as *mut u32,
-            (size / 4) as usize,
-        )
-    };
+    let pixels =
+        unsafe { std::slice::from_raw_parts_mut(mmap.as_ptr() as *mut u32, (size / 4) as usize) };
 
     for pixel in pixels.iter_mut() {
         *pixel = color;
     }
 
     // 共有メモリプールを作成
-    let pool = shm.create_pool(
-        file.as_fd(),
-        size,
-        qh,
-        (),
-    );
+    let pool = shm.create_pool(file.as_fd(), size, qh, ());
 
     // バッファを作成
     let buffer = pool.create_buffer(
@@ -351,32 +345,25 @@ fn create_cairo_text_buffer(
     let size = stride * height;
 
     // Cairo ImageSurfaceを作成
-    let mut cairo_surface = cairo::ImageSurface::create(
-        cairo::Format::ARgb32,
-        width,
-        height,
-    )
-    .context("Cairo ImageSurfaceの作成に失敗")?;
+    let mut cairo_surface = cairo::ImageSurface::create(cairo::Format::ARgb32, width, height)
+        .context("Cairo ImageSurfaceの作成に失敗")?;
 
     // スコープ内でCairo描画を行う（コンテキストをドロップするため）
     {
-        let cairo_context = cairo::Context::new(&cairo_surface)
-            .context("Cairo Contextの作成に失敗")?;
+        let cairo_context =
+            cairo::Context::new(&cairo_surface).context("Cairo Contextの作成に失敗")?;
 
         // 背景を半透明の暗い色で塗りつぶし
         cairo_context.set_source_rgba(0.1, 0.1, 0.1, 0.9); // 暗い背景、90%不透明
         cairo_context.paint().context("背景描画に失敗")?;
 
         // テキストを描画
-        cairo_context.select_font_face(
-            "Sans",
-            cairo::FontSlant::Normal,
-            cairo::FontWeight::Bold,
-        );
+        cairo_context.select_font_face("Sans", cairo::FontSlant::Normal, cairo::FontWeight::Bold);
         cairo_context.set_font_size(72.0);
 
         // テキストのサイズを測定して中央配置
-        let extents = cairo_context.text_extents(text)
+        let extents = cairo_context
+            .text_extents(text)
             .context("テキストサイズ測定に失敗")?;
 
         let x = (f64::from(width) - extents.width()) / 2.0 - extents.x_bearing();
@@ -385,38 +372,30 @@ fn create_cairo_text_buffer(
         // テキストを白色で描画
         cairo_context.set_source_rgb(1.0, 1.0, 1.0); // 白色
         cairo_context.move_to(x, y);
-        cairo_context.show_text(text).context("テキスト描画に失敗")?;
+        cairo_context
+            .show_text(text)
+            .context("テキスト描画に失敗")?;
     } // cairo_contextがここでドロップされる
 
     // Cairoサーフェスのデータを取得
     cairo_surface.flush();
-    let cairo_data = cairo_surface.data()
-        .context("Cairoデータの取得に失敗")?;
+    let cairo_data = cairo_surface.data().context("Cairoデータの取得に失敗")?;
 
     // 一時ファイルを作成（共有メモリ用）
-    let file = tempfile::tempfile()
-        .context("一時ファイルの作成に失敗")?;
+    let file = tempfile::tempfile().context("一時ファイルの作成に失敗")?;
 
     // ファイルサイズを設定
-    nix::unistd::ftruncate(&file, size as i64)
-        .context("ファイルサイズの設定に失敗")?;
+    nix::unistd::ftruncate(&file, size as i64).context("ファイルサイズの設定に失敗")?;
 
     // メモリマップ
-    let mut mmap = unsafe {
-        memmap2::MmapMut::map_mut(&file)
-            .context("メモリマップに失敗")?
-    };
+    let mut mmap =
+        unsafe { memmap2::MmapMut::map_mut(&file).context("メモリマップに失敗")? };
 
     // CairoのデータをWaylandバッファにコピー
     mmap.copy_from_slice(&cairo_data);
 
     // 共有メモリプールを作成
-    let pool = shm.create_pool(
-        file.as_fd(),
-        size,
-        qh,
-        (),
-    );
+    let pool = shm.create_pool(file.as_fd(), size, qh, ());
 
     // バッファを作成
     let buffer = pool.create_buffer(
