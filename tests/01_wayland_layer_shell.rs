@@ -140,7 +140,7 @@ fn test_layer_shell() -> Result<()> {
         &surface,
         None, // 特定のoutputを指定しない（デフォルト）
         zwlr_layer_shell_v1::Layer::Overlay, // 最前面
-        "wmfocus_test".to_string(),
+        "hyprselect_test".to_string(),
         &qh,
         (),
     );
@@ -228,7 +228,7 @@ fn test_cairo_text_rendering() -> Result<()> {
         &surface,
         None,
         zwlr_layer_shell_v1::Layer::Overlay,
-        "wmfocus_test_cairo".to_string(),
+        "hyprselect_test_cairo".to_string(),
         &qh,
         (),
     );
@@ -250,7 +250,7 @@ fn test_cairo_text_rendering() -> Result<()> {
     event_queue.blocking_dispatch(&mut AppState::new())?;
 
     // Cairoで文字を描画したバッファを作成
-    let buffer = create_cairo_text_buffer(&shm, &qh, width as i32, height as i32, "wmfocus")
+    let buffer = create_cairo_text_buffer(&shm, &qh, width as i32, height as i32, "hyprselect")
         .context("Cairo文字描画バッファの作成に失敗")?;
     println!("✓ Cairo文字描画バッファを作成");
 
@@ -266,7 +266,7 @@ fn test_cairo_text_rendering() -> Result<()> {
     event_queue.roundtrip(&mut state)?;
 
     println!("\nオーバーレイを表示中...");
-    println!("（画面中央に\"wmfocus\"という文字が表示されるはずです）");
+    println!("（画面中央に\"hyprselect\"という文字が表示されるはずです）");
     println!("\n3秒間表示...");
     std::thread::sleep(Duration::from_secs(3));
 

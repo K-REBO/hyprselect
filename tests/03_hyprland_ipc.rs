@@ -118,7 +118,7 @@ fn test_get_monitors() -> Result<()> {
 }
 
 /// テスト4: 可視ウィンドウのフィルタリング
-/// wmfocusの本来の目的：アクティブワークスペース（可視領域）内のタイルのみを対象にする
+/// hyprelectの目的：アクティブワークスペース（可視領域）内のタイルのみを対象にする
 fn test_filter_visible_windows() -> Result<()> {
     use hyprland::data::{Clients, Monitors, Workspace};
     use hyprland::prelude::*;
@@ -174,7 +174,7 @@ fn test_filter_visible_windows() -> Result<()> {
 }
 
 /// テスト5: フォーカス制御（可視タイル間）
-/// wmfocusの本来の動作：可視タイル間でのフォーカス移動
+/// hyprelectの動作：可視タイル間でのフォーカス移動
 fn test_focus() -> Result<()> {
     use hyprland::data::{Client, Clients, Monitors};
     use hyprland::dispatch::{Dispatch, DispatchType, WindowIdentifier};
@@ -228,7 +228,7 @@ fn test_focus() -> Result<()> {
 
     if visible_clients.len() < 2 {
         println!("⚠️  可視タイルが1つしかないため、フォーカステストをスキップします");
-        println!("   （wmfocusは複数タイルがある場合に有用です）");
+        println!("   （hyprelectは複数タイルがある場合に有用です）");
         return Ok(());
     }
 

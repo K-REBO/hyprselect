@@ -293,7 +293,7 @@ fn main() -> Result<()> {
         &surface,
         None,
         Layer::Overlay,
-        "wmfocus_overlay".to_string(),
+        "hyprselect_overlay".to_string(),
         &qh,
         (),
     );

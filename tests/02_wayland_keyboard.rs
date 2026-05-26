@@ -84,7 +84,7 @@ fn test_keyboard_input() -> Result<()> {
         &surface,
         None,
         zwlr_layer_shell_v1::Layer::Overlay,
-        "wmfocus_test_input".to_string(),
+        "hyprselect_test_input".to_string(),
         &qh,
         (),
     );

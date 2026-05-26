@@ -6,7 +6,7 @@ repository = "https://github.com/K-REBO/hyprselect"
 authors = ["Bido Nakamura <bido@bido.dev>", "Forked from svenstaro/wmfocus by Sven-Hendrik Haase <svenstaro@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-keywords = ["wm", "window", "manager", "i3"]
+keywords = ["wm", "window", "manager", "hyprland"]
 categories = ["command-line-utilities", "command-line-interface"]
 edition = "2021"
 
