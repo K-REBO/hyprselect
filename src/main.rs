@@ -1,6 +1,11 @@
+#[cfg(any(feature = "i3", feature = "hyprland"))]
 use std::collections::HashMap;
 
-use anyhow::{Context, Result};
+use anyhow::Result;
+#[cfg(any(feature = "i3", feature = "hyprland"))]
+use anyhow::Context;
+
+#[cfg(any(feature = "i3", feature = "hyprland"))]
 use log::{info, warn};
 
 #[cfg(feature = "i3")]
@@ -47,8 +52,11 @@ pub struct DesktopWindow {
     id: i64,
     #[allow(dead_code)]
     x_window_id: Option<i32>,
+    #[allow(dead_code)]
     pos: (i32, i32),
+    #[allow(dead_code)]
     size: (i32, i32),
+    #[allow(dead_code)]
     is_focused: bool,
 }
 

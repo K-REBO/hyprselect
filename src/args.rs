@@ -120,6 +120,7 @@ pub struct Offset {
 }
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub struct Margin {
     pub left: f32,
     pub right: f32,
@@ -168,7 +169,9 @@ fn parse_margin(s: &str) -> Result<Margin, String> {
 
 #[derive(Debug, Clone)]
 pub struct FontConfig {
+    #[allow(dead_code)]
     pub font_family: String,
+    #[allow(dead_code)]
     pub font_size: f64,
     #[allow(dead_code)]
     pub loaded_font: Vec<u8>,
@@ -298,6 +301,7 @@ pub struct AppConfig {
     pub swap: bool,
 }
 
+#[cfg(any(feature = "i3", feature = "hyprland"))]
 pub fn parse_args() -> AppConfig {
     let mut config = AppConfig::parse();
     if config.fill {

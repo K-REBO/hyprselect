@@ -1,3 +1,4 @@
+#[cfg(any(feature = "i3", feature = "hyprland"))]
 use std::iter;
 
 #[cfg(feature = "i3")]
@@ -6,10 +7,12 @@ use std::thread::sleep;
 #[cfg(feature = "i3")]
 use std::time::{Duration, Instant};
 
+#[cfg(any(feature = "i3", feature = "hyprland"))]
 use anyhow::{Context, Result};
 
 #[cfg(feature = "i3")]
 use anyhow::bail;
+#[cfg(any(feature = "i3", feature = "hyprland"))]
 use itertools::Itertools;
 
 #[cfg(feature = "i3")]
@@ -32,6 +35,7 @@ use x11rb::protocol::Event;
 #[cfg(feature = "i3")]
 use crate::args::AppConfig;
 
+#[cfg(any(feature = "i3", feature = "hyprland"))]
 use crate::DesktopWindow;
 
 #[cfg(feature = "i3")]
@@ -40,6 +44,7 @@ use crate::RenderWindow;
 /// Given a list of `current_hints` and a bunch of `hint_chars`, this finds a unique combination
 /// of characters that doesn't yet exist in `current_hints`. `max_count` is the maximum possible
 /// number of hints we need.
+#[cfg(any(feature = "i3", feature = "hyprland"))]
 pub fn get_next_hint(
     current_hints: Vec<&String>,
     hint_chars: &str,
@@ -282,6 +287,7 @@ pub fn snatch_mouse(conn: &impl Connection, screen: &Screen, timeout: Duration) 
 /// Sort list of `DesktopWindow`s by position.
 ///
 /// This sorts by column first and row second.
+#[cfg(any(feature = "i3", feature = "hyprland"))]
 pub fn sort_by_pos(mut dws: Vec<DesktopWindow>) -> Vec<DesktopWindow> {
     dws.sort_by_key(|w| w.pos.0);
     dws.sort_by_key(|w| w.pos.1);
