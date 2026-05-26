@@ -19,12 +19,10 @@ Thanks to cairo, it should work on all kinds of screens and automatically displa
 
 ## Installation
 
-**With Cargo** (clone first):
+**With Cargo**:
 ```bash
-git clone https://github.com/K-REBO/hyprselect.git
-cd hyprselect
-cargo install --features hyprland --path .  # Hyprland
-cargo install --features i3 --path .        # i3
+cargo install hyprselect --features hyprland  # Hyprland
+cargo install hyprselect --features i3        # i3
 ```
 
 **With Nix** (flakes):
