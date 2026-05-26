@@ -6,8 +6,11 @@ use std::os::fd::AsFd;
 use hyprland::prelude::*;
 
 use wayland_client::{
-    protocol::{wl_buffer, wl_compositor, wl_keyboard, wl_registry, wl_seat, wl_shm, wl_shm_pool, wl_surface},
     globals::{registry_queue_init, GlobalListContents},
+    protocol::{
+        wl_buffer, wl_compositor, wl_keyboard, wl_registry, wl_seat, wl_shm, wl_shm_pool,
+        wl_surface,
+    },
     Connection, Dispatch, QueueHandle,
 };
 
@@ -46,7 +49,8 @@ impl Dispatch<wl_registry::WlRegistry, GlobalListContents> for RenderState {
         _: &GlobalListContents,
         _: &Connection,
         _: &QueueHandle<Self>,
-    ) {}
+    ) {
+    }
 }
 
 impl Dispatch<wl_compositor::WlCompositor, ()> for RenderState {
@@ -57,7 +61,8 @@ impl Dispatch<wl_compositor::WlCompositor, ()> for RenderState {
         _: &(),
         _: &Connection,
         _: &QueueHandle<Self>,
-    ) {}
+    ) {
+    }
 }
 
 impl Dispatch<wl_surface::WlSurface, ()> for RenderState {
@@ -68,7 +73,8 @@ impl Dispatch<wl_surface::WlSurface, ()> for RenderState {
         _: &(),
         _: &Connection,
         _: &QueueHandle<Self>,
-    ) {}
+    ) {
+    }
 }
 
 impl Dispatch<wl_shm::WlShm, ()> for RenderState {
@@ -79,7 +85,8 @@ impl Dispatch<wl_shm::WlShm, ()> for RenderState {
         _: &(),
         _: &Connection,
         _: &QueueHandle<Self>,
-    ) {}
+    ) {
+    }
 }
 
 impl Dispatch<wl_shm_pool::WlShmPool, ()> for RenderState {
@@ -90,7 +97,8 @@ impl Dispatch<wl_shm_pool::WlShmPool, ()> for RenderState {
         _: &(),
         _: &Connection,
         _: &QueueHandle<Self>,
-    ) {}
+    ) {
+    }
 }
 
 impl Dispatch<wl_buffer::WlBuffer, ()> for RenderState {
@@ -101,7 +109,8 @@ impl Dispatch<wl_buffer::WlBuffer, ()> for RenderState {
         _: &(),
         _: &Connection,
         _: &QueueHandle<Self>,
-    ) {}
+    ) {
+    }
 }
 
 impl Dispatch<zwlr_layer_shell_v1::ZwlrLayerShellV1, ()> for RenderState {
@@ -112,7 +121,8 @@ impl Dispatch<zwlr_layer_shell_v1::ZwlrLayerShellV1, ()> for RenderState {
         _: &(),
         _: &Connection,
         _: &QueueHandle<Self>,
-    ) {}
+    ) {
+    }
 }
 
 impl Dispatch<zwlr_layer_surface_v1::ZwlrLayerSurfaceV1, ()> for RenderState {
@@ -139,7 +149,8 @@ impl Dispatch<wl_seat::WlSeat, ()> for RenderState {
         _: &(),
         _: &Connection,
         _: &QueueHandle<Self>,
-    ) {}
+    ) {
+    }
 }
 
 impl Dispatch<wl_keyboard::WlKeyboard, ()> for RenderState {
@@ -154,47 +165,56 @@ impl Dispatch<wl_keyboard::WlKeyboard, ()> for RenderState {
         use xkbcommon::xkb;
 
         match event {
-            wl_keyboard::Event::Keymap { format, fd, size } => {
-                if format == wayland_client::WEnum::Value(wl_keyboard::KeymapFormat::XkbV1) {
-                    let keymap_data = unsafe {
-                        let ptr = nix::sys::mman::mmap(
-                            None,
-                            std::num::NonZeroUsize::new(size as usize).unwrap(),
-                            nix::sys::mman::ProtFlags::PROT_READ,
-                            nix::sys::mman::MapFlags::MAP_PRIVATE,
-                            fd.as_fd(),
-                            0,
-                        )
-                        .expect("mmap failed");
+            wl_keyboard::Event::Keymap {
+                format: wayland_client::WEnum::Value(wl_keyboard::KeymapFormat::XkbV1),
+                fd,
+                size,
+            } => {
+                let keymap_data = unsafe {
+                    let ptr = nix::sys::mman::mmap(
+                        None,
+                        std::num::NonZeroUsize::new(size as usize).unwrap(),
+                        nix::sys::mman::ProtFlags::PROT_READ,
+                        nix::sys::mman::MapFlags::MAP_PRIVATE,
+                        fd.as_fd(),
+                        0,
+                    )
+                    .expect("mmap failed");
 
-                        let slice = std::slice::from_raw_parts(ptr.as_ptr() as *const u8, size as usize - 1);
-                        let keymap_str = std::str::from_utf8_unchecked(slice);
-                        let result = keymap_str.to_string();
+                    let slice =
+                        std::slice::from_raw_parts(ptr.as_ptr() as *const u8, size as usize - 1);
+                    let keymap_str = std::str::from_utf8_unchecked(slice);
+                    let result = keymap_str.to_string();
 
-                        nix::sys::mman::munmap(ptr, size as usize).expect("munmap failed");
-                        result
-                    };
+                    nix::sys::mman::munmap(ptr, size as usize).expect("munmap failed");
+                    result
+                };
 
-                    if let Some(kb_state) = &mut state.keyboard_state {
-                        let keymap = xkb::Keymap::new_from_string(
-                            &kb_state.xkb_context,
-                            keymap_data,
-                            xkb::KEYMAP_FORMAT_TEXT_V1,
-                            xkb::KEYMAP_COMPILE_NO_FLAGS,
-                        )
-                        .expect("Failed to create keymap");
+                if let Some(kb_state) = &mut state.keyboard_state {
+                    let keymap = xkb::Keymap::new_from_string(
+                        &kb_state.xkb_context,
+                        keymap_data,
+                        xkb::KEYMAP_FORMAT_TEXT_V1,
+                        xkb::KEYMAP_COMPILE_NO_FLAGS,
+                    )
+                    .expect("Failed to create keymap");
 
-                        kb_state.xkb_state = Some(xkb::State::new(&keymap));
-                    }
+                    kb_state.xkb_state = Some(xkb::State::new(&keymap));
                 }
             }
 
-            wl_keyboard::Event::Key { key, state: key_state, .. } => {
+            wl_keyboard::Event::Key {
+                key,
+                state: key_state,
+                ..
+            } => {
                 if let Some(kb_state) = &mut state.keyboard_state {
                     if let Some(xkb_state) = &mut kb_state.xkb_state {
                         let keycode = key + 8; // Wayland to xkb conversion
 
-                        if let wayland_client::WEnum::Value(wl_keyboard::KeyState::Pressed) = key_state {
+                        if let wayland_client::WEnum::Value(wl_keyboard::KeyState::Pressed) =
+                            key_state
+                        {
                             let keysym = xkb_state.key_get_one_sym(xkb::Keycode::from(keycode));
                             let keysym_name = xkb::keysym_get_name(keysym);
 
@@ -219,10 +239,23 @@ impl Dispatch<wl_keyboard::WlKeyboard, ()> for RenderState {
                 }
             }
 
-            wl_keyboard::Event::Modifiers { mods_depressed, mods_latched, mods_locked, group, .. } => {
+            wl_keyboard::Event::Modifiers {
+                mods_depressed,
+                mods_latched,
+                mods_locked,
+                group,
+                ..
+            } => {
                 if let Some(kb_state) = &mut state.keyboard_state {
                     if let Some(xkb_state) = &mut kb_state.xkb_state {
-                        xkb_state.update_mask(mods_depressed, mods_latched, mods_locked, 0, 0, group);
+                        xkb_state.update_mask(
+                            mods_depressed,
+                            mods_latched,
+                            mods_locked,
+                            0,
+                            0,
+                            group,
+                        );
                     }
                 }
             }
@@ -234,9 +267,7 @@ impl Dispatch<wl_keyboard::WlKeyboard, ()> for RenderState {
 
 impl WaylandRenderer {
     pub fn new(app_config: AppConfig) -> Result<Self> {
-        Ok(Self {
-            app_config,
-        })
+        Ok(Self { app_config })
     }
 
     pub fn render_hints(
@@ -255,8 +286,8 @@ impl WaylandRenderer {
     ) -> Result<Option<&'a DesktopWindow>> {
         let conn = Connection::connect_to_env().context("Failed to connect to Wayland")?;
 
-        let (globals, mut event_queue) = registry_queue_init::<RenderState>(&conn)
-            .context("Failed to get global registry")?;
+        let (globals, mut event_queue) =
+            registry_queue_init::<RenderState>(&conn).context("Failed to get global registry")?;
 
         let qh = event_queue.handle();
 
@@ -294,11 +325,13 @@ impl WaylandRenderer {
         let monitors = hyprland::data::Monitors::get().context("Failed to get monitors")?;
         let monitor_vec = monitors.to_vec();
 
-        let screen_width = monitor_vec.iter()
+        let screen_width = monitor_vec
+            .iter()
             .map(|m| m.x + m.width as i32)
             .max()
             .unwrap_or(1920);
-        let screen_height = monitor_vec.iter()
+        let screen_height = monitor_vec
+            .iter()
             .map(|m| m.y + m.height as i32)
             .max()
             .unwrap_or(1080);
@@ -367,22 +400,22 @@ impl WaylandRenderer {
         let size = stride * height;
 
         let temp_file = tempfile::tempfile().context("Failed to create temp file")?;
-        temp_file.set_len(size as u64).context("Failed to set file size")?;
+        temp_file
+            .set_len(size as u64)
+            .context("Failed to set file size")?;
 
-        let mut cairo_surface = cairo::ImageSurface::create(
-            cairo::Format::ARgb32,
-            width,
-            height,
-        )
-        .context("Failed to create Cairo surface")?;
+        let mut cairo_surface = cairo::ImageSurface::create(cairo::Format::ARgb32, width, height)
+            .context("Failed to create Cairo surface")?;
 
         {
-            let cairo_context = cairo::Context::new(&cairo_surface)
-                .context("Failed to create Cairo context")?;
+            let cairo_context =
+                cairo::Context::new(&cairo_surface).context("Failed to create Cairo context")?;
 
             // Transparent background
             cairo_context.set_source_rgba(0.0, 0.0, 0.0, 0.0);
-            cairo_context.paint().context("Failed to paint background")?;
+            cairo_context
+                .paint()
+                .context("Failed to paint background")?;
 
             // Draw hint for each window
             for (hint, window) in hints {
@@ -394,23 +427,13 @@ impl WaylandRenderer {
         let cairo_data = cairo_surface.data().context("Failed to get Cairo data")?;
 
         // Copy to Wayland buffer
-        let mut mmap = unsafe {
-            memmap2::MmapMut::map_mut(&temp_file).context("mmap failed")?
-        };
+        let mut mmap = unsafe { memmap2::MmapMut::map_mut(&temp_file).context("mmap failed")? };
 
         mmap.copy_from_slice(&cairo_data);
         drop(mmap);
 
         let pool = shm.create_pool(temp_file.as_fd(), size, qh, ());
-        let buffer = pool.create_buffer(
-            0,
-            width,
-            height,
-            stride,
-            wl_shm::Format::Argb8888,
-            qh,
-            (),
-        );
+        let buffer = pool.create_buffer(0, width, height, stride, wl_shm::Format::Argb8888, qh, ());
 
         pool.destroy();
         Ok(buffer)
@@ -451,7 +474,9 @@ impl WaylandRenderer {
             let rx = match self.app_config.horizontal_align {
                 HorizontalAlign::Left => window.pos.0 as f64 + x_offset,
                 HorizontalAlign::Center => window.pos.0 as f64 + (window.size.0 as f64 - rw) / 2.0,
-                HorizontalAlign::Right => window.pos.0 as f64 + window.size.0 as f64 - rw - x_offset,
+                HorizontalAlign::Right => {
+                    window.pos.0 as f64 + window.size.0 as f64 - rw - x_offset
+                }
             };
 
             let y_offset = self.app_config.offset.y as f64;
@@ -476,10 +501,34 @@ impl WaylandRenderer {
         let degrees = std::f64::consts::PI / 180.0;
 
         ctx.new_sub_path();
-        ctx.arc(x + rect_width - radius, y + radius, radius, -90.0 * degrees, 0.0 * degrees);
-        ctx.arc(x + rect_width - radius, y + rect_height - radius, radius, 0.0 * degrees, 90.0 * degrees);
-        ctx.arc(x + radius, y + rect_height - radius, radius, 90.0 * degrees, 180.0 * degrees);
-        ctx.arc(x + radius, y + radius, radius, 180.0 * degrees, 270.0 * degrees);
+        ctx.arc(
+            x + rect_width - radius,
+            y + radius,
+            radius,
+            -90.0 * degrees,
+            0.0 * degrees,
+        );
+        ctx.arc(
+            x + rect_width - radius,
+            y + rect_height - radius,
+            radius,
+            0.0 * degrees,
+            90.0 * degrees,
+        );
+        ctx.arc(
+            x + radius,
+            y + rect_height - radius,
+            radius,
+            90.0 * degrees,
+            180.0 * degrees,
+        );
+        ctx.arc(
+            x + radius,
+            y + radius,
+            radius,
+            180.0 * degrees,
+            270.0 * degrees,
+        );
         ctx.close_path();
         ctx.fill()?;
 

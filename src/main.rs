@@ -1,9 +1,9 @@
 #[cfg(any(feature = "i3", feature = "hyprland"))]
 use std::collections::HashMap;
 
-use anyhow::Result;
 #[cfg(any(feature = "i3", feature = "hyprland"))]
 use anyhow::Context;
+use anyhow::Result;
 
 #[cfg(any(feature = "i3", feature = "hyprland"))]
 use log::{info, warn};
@@ -102,7 +102,7 @@ fn main() -> Result<()> {
             app_config.font.font_size,
         )
         .context("Couldn't create extents for text")?;
-        let (width, height, margin_left, margin_top) = if app_config.fill {
+        let (width, height, margin_left, _margin_top) = if app_config.fill {
             (
                 desktop_window.size.0 as u16,
                 desktop_window.size.1 as u16,
@@ -389,7 +389,8 @@ fn main() -> Result<()> {
     let mut hints = HashMap::new();
     let hint_chars = app_config.hint_chars.clone();
     for window in &desktop_windows {
-        let hint = utils::get_next_hint(hints.keys().collect(), &hint_chars, desktop_windows.len())?;
+        let hint =
+            utils::get_next_hint(hints.keys().collect(), &hint_chars, desktop_windows.len())?;
         hints.insert(hint, window);
     }
 
@@ -401,7 +402,10 @@ fn main() -> Result<()> {
 
     // Wait for user input and focus selected window
     if let Some(selected_window) = renderer.wait_for_hint_selection(&hints)? {
-        info!("Focusing window at ({}, {})", selected_window.pos.0, selected_window.pos.1);
+        info!(
+            "Focusing window at ({}, {})",
+            selected_window.pos.0, selected_window.pos.1
+        );
         wm::focus_window(selected_window)?;
     }
 

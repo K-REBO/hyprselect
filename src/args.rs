@@ -56,35 +56,22 @@ fn parse_truetype_font(f: &str) -> Result<FontConfig> {
         v.next().context("Wrong font format")?,
         v.next().context("Wrong font format")?,
     );
+    let font_size = size.parse::<f64>().context("Couldn't parse font size")?;
 
-    // Skip font loading for Hyprland/Wayland (uses Cairo default fonts)
     #[cfg(feature = "hyprland")]
-    {
-        let font_config = FontConfig {
-            font_family: family.to_string(),
-            font_size: size.parse::<f64>().context("Couldn't parse font size")?,
-            loaded_font: Vec::new(),
-        };
-        return Ok(font_config);
-    }
+    let loaded_font: Vec<u8> = Vec::new();
 
     #[cfg(feature = "i3")]
-    {
-        let loaded_font = load_font(family).context("Couldn't load font")?;
-        let font_config = FontConfig {
-            font_family: family.to_string(),
-            font_size: size.parse::<f64>().context("Couldn't parse font size")?,
-            loaded_font,
-        };
-        Ok(font_config)
-    }
+    let loaded_font = load_font(family).context("Couldn't load font")?;
 
     #[cfg(not(any(feature = "i3", feature = "hyprland")))]
-    {
-        let _ = family;
-        let _ = size;
-        unreachable!()
-    }
+    let loaded_font: Vec<u8> = Vec::new();
+
+    Ok(FontConfig {
+        font_family: family.to_string(),
+        font_size,
+        loaded_font,
+    })
 }
 
 /// Validate coordinates and parse offset.
