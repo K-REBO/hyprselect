@@ -16,6 +16,10 @@
 //   - 表示されたヒント文字を押すと、対応するウィンドウにフォーカスが移ります
 //   - Escapeキーでキャンセルします
 
+// hyprland 機能が無効なビルド（例: --features i3）ではこのファイルを空にする。
+// そうしないと cargo test が依存クレート不在でコンパイルエラーになる。
+#![cfg(feature = "hyprland")]
+
 use anyhow::{Context, Result};
 use std::os::fd::AsFd;
 

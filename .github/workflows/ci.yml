@@ -45,3 +45,29 @@ jobs:
         with:
           components: clippy
       - run: cargo clippy --features i3 -- -D warnings
+
+  test-hyprland:
+    name: Test (hyprland)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libcairo2-dev libxcb1-dev libglib2.0-dev \
+            libwayland-dev libxkbcommon-dev
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo test --features hyprland
+
+  test-i3:
+    name: Test (i3)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libcairo2-dev libxcb1-dev libglib2.0-dev \
+            libxkbcommon-dev libxkbcommon-x11-dev libxcb-keysyms1-dev libfontconfig1-dev
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo test --features i3

@@ -12,6 +12,10 @@
 //   - 任意のキーを押すとキー情報が表示されます
 //   - Escapeキーで終了します
 
+// wayland 機能が無効なビルド（例: --features i3）ではこのファイルを空にする。
+// そうしないと cargo test が依存クレート不在でコンパイルエラーになる。
+#![cfg(feature = "wayland")]
+
 use anyhow::{Context, Result};
 use std::os::fd::AsFd;
 

@@ -9,6 +9,10 @@
 //   - Waylandコンポジタ（Hyprland）が起動していること
 //   - WAYLAND_DISPLAY環境変数が設定されていること
 
+// wayland 機能が無効なビルド（例: --features i3）ではこのファイルを空にする。
+// そうしないと cargo test が依存クレート不在でコンパイルエラーになる。
+#![cfg(feature = "wayland")]
+
 use anyhow::{bail, Context, Result};
 use std::os::fd::AsFd;
 use std::time::Duration;

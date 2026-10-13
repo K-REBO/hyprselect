@@ -7,6 +7,10 @@
 // 前提条件:
 //   - Hyprlandが起動していること
 
+// hyprland 機能が無効なビルド（例: --features i3）ではこのファイルを空にする。
+// そうしないと cargo test が依存クレート不在でコンパイルエラーになる。
+#![cfg(feature = "hyprland")]
+
 use anyhow::{Context, Result};
 
 fn main() -> Result<()> {

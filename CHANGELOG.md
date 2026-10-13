@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- next-header -->
 
 ## [Unreleased] - ReleaseDate
+- Fix `cargo test` failing to compile for both the `hyprland` and `i3` feature sets
+  by feature-gating backend-specific tests, and add CI jobs that run them
 
 ## [1.5.0] - 2024-01-01
 - Add the `--swap` flag to swap the currently active window with the selected window [#325](https://github.com/svenstaro/wmfocus/pull/325) (thanks @Nukesor)

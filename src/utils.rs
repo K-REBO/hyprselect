@@ -405,7 +405,10 @@ impl Sequence {
     }
 }
 
-#[cfg(test)]
+// `intersects` と `Sequence` の push/remove/is_started は i3 バックエンド専用なので、
+// それらを使うこのテストモジュールも i3 機能有効時のみコンパイルする。
+// (そうしないと `cargo test --features hyprland` がコンパイルエラーになる)
+#[cfg(all(test, feature = "i3"))]
 mod tests {
     use super::*;
 
