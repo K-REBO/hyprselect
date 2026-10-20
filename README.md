@@ -9,13 +9,41 @@
 This tool allows you to rapidly choose a specific window directly without having to use the mouse or directional keyboard navigation.
 
 **Supported window managers:**
-- **Hyprland** (Wayland) — actively maintained in this fork
+- **Hyprland** (Wayland) — actively maintained in this fork, **requires Hyprland 0.56 or newer** (see [Hyprland compatibility](#hyprland-compatibility))
 - i3
 
 <video src="https://github.com/user-attachments/assets/9c5aeac1-f342-4704-ba78-18c4ed5cc5be" autoplay loop muted playsinline></video>
 
 Thanks to cairo, it should work on all kinds of screens and automatically display at the correct size according to your DPI.
 
+
+## Hyprland compatibility
+
+**The Hyprland backend requires Hyprland 0.56 or newer.** For Hyprland 0.55 and older,
+use hyprselect 0.1.0.
+
+Hyprland 0.55 deprecated hyprlang in favour of Lua, and as of 0.56 the payload of a
+`dispatch` IPC request is evaluated as Lua (`return hl.dispatch(<payload>)`). The old
+string form that every pre-0.56 client sends, e.g.
+
+```
+dispatch focuswindow address:0x55a1b2c3d4e5
+```
+
+is therefore a Lua syntax error and Hyprland answers with
+`')' expected near 'address'`. hyprselect now sends the Lua dispatcher expression
+instead:
+
+```
+dispatch hl.dsp.focus({ window = "address:0x55a1b2c3d4e5" })
+```
+
+The [`hyprland`](https://crates.io/crates/hyprland) crate (0.4.0-beta.3, still the
+latest release) only knows the old syntax, so hyprselect builds the payload itself and
+passes it through the crate's `DispatchType::Custom` escape hatch. Window and monitor
+queries are unaffected by the Lua change and keep using the crate as is — only the focus
+dispatch had to change, which is why on Hyprland 0.56 the hint overlay of older
+hyprselect versions still shows up but pressing a hint key never switches windows.
 
 ## Installation
 
@@ -156,6 +184,11 @@ If there's some funky stuff, you can try to track it down by running `hyprselect
     RUST_LOG=trace hyprselect
 
 This will print quite some useful debugging info.
+
+On Hyprland, if the hint overlay shows up but pressing a hint key does not switch
+windows, check the `Dispatched ...` debug line for Hyprland's reply. A Lua error there
+means your Hyprland is too old or too new for this version of hyprselect — see
+[Hyprland compatibility](#hyprland-compatibility).
 
 
 ## Compiling

@@ -1,6 +1,6 @@
 use anyhow::{Context, Result};
 use hyprland::data::{Client, Clients, Monitors};
-use hyprland::dispatch::{Dispatch as HyprDispatch, DispatchType, WindowIdentifier};
+use hyprland::dispatch::{Dispatch as HyprDispatch, DispatchType};
 use hyprland::prelude::*;
 use log::{debug, info, warn};
 
@@ -65,6 +65,21 @@ fn compute_client_id(address: &hyprland::shared::Address) -> i64 {
     hasher.finish() as i64
 }
 
+/// Focus the window with the given address.
+///
+/// Since Hyprland 0.56 the payload of a `dispatch` IPC request is evaluated as
+/// Lua (`return hl.dispatch(<payload>)`), so the legacy string form that
+/// `DispatchType::FocusWindow` renders (`focuswindow address:0x…`) is a Lua
+/// syntax error. `DispatchType::Custom` passes our own payload through verbatim,
+/// which lets us send the Lua dispatcher expression instead. Queries such as
+/// `Clients::get` are unaffected by that change and keep using the crate as is.
+fn focus(address: &hyprland::shared::Address) -> Result<()> {
+    let dispatcher = format!("hl.dsp.focus({{ window = 'address:{address}' }})");
+    debug!("Dispatching `{dispatcher}`");
+    HyprDispatch::call(DispatchType::Custom(&dispatcher, ""))?;
+    Ok(())
+}
+
 /// Focus a specific window by its ID.
 pub fn focus_window(window: &DesktopWindow) -> Result<()> {
     debug!(
@@ -98,10 +113,7 @@ pub fn focus_window(window: &DesktopWindow) -> Result<()> {
         target_client.title, window.pos.0, window.pos.1
     );
 
-    HyprDispatch::call(DispatchType::FocusWindow(WindowIdentifier::Address(
-        target_client.address.clone(),
-    )))
-    .context("Failed to focus window")?;
+    focus(&target_client.address).context("Failed to focus window")?;
 
     Ok(())
 }
@@ -127,13 +139,11 @@ pub fn swap_windows(active_window: &DesktopWindow, window: &DesktopWindow) -> Re
         active_window.pos.0, active_window.pos.1, window.pos.0, window.pos.1
     );
 
-    // TODO: Implement proper window swapping for Hyprland
-    // Hyprland's SwapWindow uses Direction, not WindowIdentifier
-    // For now, just focus the target window
-    HyprDispatch::call(DispatchType::FocusWindow(WindowIdentifier::Address(
-        target_client.address.clone(),
-    )))
-    .context("Failed to focus target window")?;
+    // TODO: Implement proper window swapping for Hyprland.
+    // Hyprland 0.56 exposes `hl.dsp.window.swap({ target = … })`, which swaps the
+    // *focused* window with the target; wiring that up needs the active window to
+    // be focused first. For now, just focus the target window.
+    focus(&target_client.address).context("Failed to focus target window")?;
 
     warn!("Window swapping not fully implemented for Hyprland yet");
 

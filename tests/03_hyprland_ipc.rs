@@ -183,7 +183,7 @@ fn test_filter_visible_windows() -> Result<()> {
 /// hyprelectの動作：可視タイル間でのフォーカス移動
 fn test_focus() -> Result<()> {
     use hyprland::data::{Client, Clients, Monitors};
-    use hyprland::dispatch::{Dispatch, DispatchType, WindowIdentifier};
+    use hyprland::dispatch::{Dispatch, DispatchType};
     use hyprland::prelude::*;
 
     // アクティブウィンドウを取得
@@ -254,10 +254,11 @@ fn test_focus() -> Result<()> {
 
     // フォーカスを実行
     println!("\n可視タイル間でフォーカスを移動します...");
-    Dispatch::call(DispatchType::FocusWindow(WindowIdentifier::Address(
-        target.address.clone(),
-    )))
-    .context("フォーカスの変更に失敗")?;
+    // Hyprland 0.56 以降、dispatch のペイロードは Lua として評価されるため、
+    // DispatchType::FocusWindow が生成する旧構文は構文エラーになる。
+    // src/wm_hyprland.rs と同じ Lua ディスパッチャ式を送る。
+    let dispatcher = format!("hl.dsp.focus({{ window = 'address:{}' }})", target.address);
+    Dispatch::call(DispatchType::Custom(&dispatcher, "")).context("フォーカスの変更に失敗")?;
 
     println!("✓ フォーカス変更成功");
 

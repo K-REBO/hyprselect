@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- next-header -->
 
 ## [Unreleased] - ReleaseDate
+
+## [0.2.0] - 2026-10-20
+- Fix selecting a hint not focusing anything on Hyprland 0.56+. Hyprland now evaluates
+  the payload of a `dispatch` IPC request as Lua, so the legacy
+  `dispatch focuswindow address:0x…` form emitted by the `hyprland` crate is a syntax
+  error. hyprselect now sends `hl.dsp.focus({ window = 'address:0x…' })` instead.
+  **This raises the minimum supported Hyprland version to 0.56**; use 0.1.0 for
+  Hyprland 0.55 and older
 - Fix `cargo test` failing to compile for both the `hyprland` and `i3` feature sets
   by feature-gating backend-specific tests, and add CI jobs that run them
 
@@ -47,7 +55,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Update to Rust 2018 edition
 
 <!-- next-url -->
-[Unreleased]: https://github.com/K-REBO/hyprselect/compare/v1.5.0...HEAD
+[Unreleased]: https://github.com/K-REBO/hyprselect/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/K-REBO/hyprselect/compare/v1.5.0...v0.2.0
 [1.5.0]: https://github.com/svenstaro/wmfocus/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/svenstaro/wmfocus/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/svenstaro/wmfocus/compare/v1.2.0...v1.3.0
